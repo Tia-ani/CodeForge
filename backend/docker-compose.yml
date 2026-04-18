@@ -1,0 +1,20 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: codeforge-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: codeforge
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  # Wait, the judge engine might run inside a container or spawn sibling containers.
+  # If the judge needs to spawn docker containers, it would need the docker socket mounted.
+  
+volumes:
+  postgres_data:
