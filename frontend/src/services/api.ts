@@ -44,4 +44,9 @@ export const leaderboardAPI = {
   getAll: () => api.get('/leaderboard'),
 };
 
+// Profile API
+export const profileAPI = {
+  getProfile: () => api.get('/profile'),
+};
+
 export default api;

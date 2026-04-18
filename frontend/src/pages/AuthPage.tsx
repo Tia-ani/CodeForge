@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Code2, Mail, Lock, User as UserIcon } from 'lucide-react';
 
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -25,7 +24,7 @@ const AuthPage = () => {
       }
       navigate('/problems');
     } catch (err: any) {
-      setError(err.response?.data?.error || err.response?.data?.errors?.email || 'Something went wrong');
+      setError(err.response?.data?.error || 'Something went wrong');
     } finally {
       setLoading(false);
     }
@@ -34,36 +33,26 @@ const AuthPage = () => {
   return (
     <div className="fade-in" style={{
       display: 'flex', justifyContent: 'center', alignItems: 'center',
-      minHeight: 'calc(100vh - 60px)', padding: '2rem',
+      minHeight: 'calc(100vh - 50px)',
     }}>
-      <div className="glass-card" style={{
-        width: '100%', maxWidth: '420px', padding: '2.5rem',
-        animation: 'slideUp 0.5s ease-out',
+      <div style={{
+        width: 400, background: 'var(--lc-bg-layer1)', borderRadius: 'var(--radius)',
+        padding: 32, border: '1px solid var(--lc-border)',
       }}>
-        {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <div style={{
-            background: 'linear-gradient(135deg, var(--accent-primary), var(--accent-purple))',
-            width: 48, height: 48, borderRadius: '12px', display: 'flex',
-            alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem',
-            boxShadow: '0 0 20px rgba(59, 130, 246, 0.3)',
-          }}>
-            <Code2 color="white" size={24} />
+        <div style={{ textAlign: 'center', marginBottom: 24 }}>
+          <div style={{ fontSize: 24, fontWeight: 700 }}>
+            {isLogin ? 'Sign In' : 'Register'}
           </div>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 700 }}>
-            {isLogin ? 'Welcome back' : 'Create account'}
-          </h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '0.4rem' }}>
-            {isLogin ? 'Sign in to continue solving problems' : 'Join CodeForge and start coding'}
+          <p style={{ color: 'var(--lc-text-muted)', fontSize: 13, marginTop: 6 }}>
+            {isLogin ? 'Sign in to track your progress' : 'Join CodeForge and start coding'}
           </p>
         </div>
 
-        {/* Demo credentials hint */}
         {isLogin && (
           <div style={{
-            background: 'rgba(59, 130, 246, 0.08)', border: '1px solid rgba(59, 130, 246, 0.2)',
-            borderRadius: 'var(--radius-sm)', padding: '0.75rem', marginBottom: '1.5rem',
-            fontSize: '0.8rem', color: 'var(--accent-primary)',
+            background: 'var(--lc-brand-dim)', border: '1px solid #ffa11644',
+            borderRadius: 'var(--radius)', padding: '10px 14px', marginBottom: 16,
+            fontSize: 12, color: 'var(--lc-brand)',
           }}>
             <strong>Demo:</strong> anishka@codeforge.com / user123
           </div>
@@ -71,59 +60,35 @@ const AuthPage = () => {
 
         {error && (
           <div style={{
-            background: 'var(--error-bg)', border: '1px solid rgba(239,68,68,0.2)',
-            borderRadius: 'var(--radius-sm)', padding: '0.75rem', marginBottom: '1rem',
-            fontSize: '0.85rem', color: 'var(--error)',
+            background: 'var(--lc-hard-bg)', border: '1px solid #ff375f44',
+            borderRadius: 'var(--radius)', padding: '10px 14px', marginBottom: 16,
+            fontSize: 12, color: 'var(--lc-hard)',
           }}>
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {!isLogin && (
-            <div style={{ position: 'relative' }}>
-              <UserIcon size={16} style={{
-                position: 'absolute', left: '0.9rem', top: '50%',
-                transform: 'translateY(-50%)', color: 'var(--text-muted)',
-              }} />
-              <input className="input-field" type="text" placeholder="Full name"
-                value={name} onChange={e => setName(e.target.value)} required
-                style={{ paddingLeft: '2.5rem' }} />
-            </div>
+            <input className="lc-input" type="text" placeholder="Full name"
+              value={name} onChange={e => setName(e.target.value)} required />
           )}
-          <div style={{ position: 'relative' }}>
-            <Mail size={16} style={{
-              position: 'absolute', left: '0.9rem', top: '50%',
-              transform: 'translateY(-50%)', color: 'var(--text-muted)',
-            }} />
-            <input className="input-field" type="email" placeholder="Email address"
-              value={email} onChange={e => setEmail(e.target.value)} required
-              style={{ paddingLeft: '2.5rem' }} />
-          </div>
-          <div style={{ position: 'relative' }}>
-            <Lock size={16} style={{
-              position: 'absolute', left: '0.9rem', top: '50%',
-              transform: 'translateY(-50%)', color: 'var(--text-muted)',
-            }} />
-            <input className="input-field" type="password" placeholder="Password"
-              value={password} onChange={e => setPassword(e.target.value)} required
-              style={{ paddingLeft: '2.5rem' }} />
-          </div>
+          <input className="lc-input" type="email" placeholder="Email"
+            value={email} onChange={e => setEmail(e.target.value)} required />
+          <input className="lc-input" type="password" placeholder="Password"
+            value={password} onChange={e => setPassword(e.target.value)} required />
 
-          <button type="submit" className="btn-primary" disabled={loading}
-            style={{ width: '100%', padding: '0.85rem', marginTop: '0.5rem', fontSize: '0.95rem' }}>
-            {loading ? <span className="spinner" /> : isLogin ? 'Sign In' : 'Create Account'}
+          <button type="submit" className="lc-btn-primary" disabled={loading}
+            style={{ width: '100%', padding: 10, marginTop: 4, fontSize: 14 }}>
+            {loading ? <span className="spinner" /> : isLogin ? 'Sign In' : 'Register'}
           </button>
         </form>
 
-        <div style={{
-          textAlign: 'center', marginTop: '1.5rem',
-          color: 'var(--text-secondary)', fontSize: '0.9rem',
-        }}>
-          {isLogin ? "Don't have an account?" : 'Already have an account?'}{' '}
+        <div style={{ textAlign: 'center', marginTop: 16, color: 'var(--lc-text-muted)', fontSize: 13 }}>
+          {isLogin ? "Don't have an account?" : 'Already have one?'}{' '}
           <span onClick={() => { setIsLogin(!isLogin); setError(''); }}
-            style={{ color: 'var(--accent-primary)', cursor: 'pointer', fontWeight: 500 }}>
-            {isLogin ? 'Sign up' : 'Sign in'}
+            style={{ color: 'var(--lc-brand)', cursor: 'pointer', fontWeight: 500 }}>
+            {isLogin ? 'Register' : 'Sign In'}
           </span>
         </div>
       </div>
