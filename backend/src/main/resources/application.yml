@@ -2,24 +2,25 @@ server:
   port: 8080
 
 spring:
+  # Use H2 in-memory DB by default so the app runs without external Postgres
   datasource:
-    url: jdbc:postgresql://localhost:5432/codeforge
-    username: postgres
-    password: password
-    driver-class-name: org.postgresql.Driver
+    url: jdbc:h2:mem:codeforge;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
   jpa:
     hibernate:
-      ddl-auto: update
-    show-sql: true
+      ddl-auto: create-drop
+    show-sql: false
     properties:
       hibernate:
         format_sql: true
-        dialect: org.hibernate.dialect.PostgreSQLDialect
+    database-platform: org.hibernate.dialect.H2Dialect
 
 jwt:
-  secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+  secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970337336763979244226452948404D6351
   expiration: 86400000
-
-judge:
-  docker:
-    enabled: true
