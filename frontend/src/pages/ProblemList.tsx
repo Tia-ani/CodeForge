@@ -1,114 +1,143 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
-import { Search, Filter, BookOpen } from 'lucide-react';
+import { problemAPI } from '../services/api';
+import { Search, BookOpen, CheckCircle2 } from 'lucide-react';
 
 interface Problem {
   problemId: number;
   title: string;
   difficulty: string;
-  description: string;
+  testCaseCount: number;
 }
+
+const FALLBACK: Problem[] = [
+  { problemId: 1, title: 'Two Sum', difficulty: 'EASY', testCaseCount: 3 },
+  { problemId: 2, title: 'Valid Parentheses', difficulty: 'EASY', testCaseCount: 4 },
+  { problemId: 3, title: 'Climbing Stairs', difficulty: 'EASY', testCaseCount: 3 },
+  { problemId: 4, title: 'Best Time to Buy and Sell Stock', difficulty: 'EASY', testCaseCount: 2 },
+  { problemId: 5, title: 'Reverse Linked List', difficulty: 'EASY', testCaseCount: 3 },
+  { problemId: 6, title: 'Maximum Subarray', difficulty: 'EASY', testCaseCount: 3 },
+  { problemId: 7, title: 'Merge Two Sorted Lists', difficulty: 'EASY', testCaseCount: 3 },
+  { problemId: 8, title: 'Add Two Numbers', difficulty: 'MEDIUM', testCaseCount: 3 },
+  { problemId: 9, title: 'Longest Substring Without Repeating Characters', difficulty: 'MEDIUM', testCaseCount: 3 },
+  { problemId: 10, title: 'Merge Intervals', difficulty: 'MEDIUM', testCaseCount: 2 },
+  { problemId: 11, title: 'Coin Change', difficulty: 'MEDIUM', testCaseCount: 3 },
+  { problemId: 12, title: '3Sum', difficulty: 'MEDIUM', testCaseCount: 3 },
+  { problemId: 13, title: 'Group Anagrams', difficulty: 'MEDIUM', testCaseCount: 3 },
+  { problemId: 14, title: 'Median of Two Sorted Arrays', difficulty: 'HARD', testCaseCount: 2 },
+  { problemId: 15, title: 'Trapping Rain Water', difficulty: 'HARD', testCaseCount: 2 },
+  { problemId: 16, title: 'N-Queens', difficulty: 'HARD', testCaseCount: 2 },
+  { problemId: 17, title: 'Merge K Sorted Lists', difficulty: 'HARD', testCaseCount: 3 },
+  { problemId: 18, title: 'Longest Valid Parentheses', difficulty: 'HARD', testCaseCount: 3 },
+  { problemId: 19, title: 'Word Search II', difficulty: 'HARD', testCaseCount: 1 },
+  { problemId: 20, title: 'Regular Expression Matching', difficulty: 'HARD', testCaseCount: 3 },
+];
 
 const ProblemList = () => {
   const [problems, setProblems] = useState<Problem[]>([]);
+  const [search, setSearch] = useState('');
+  const [diffFilter, setDiffFilter] = useState<string>('ALL');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Attempt to fetch from backend API
-    axios.get('/api/problems')
-      .then(res => {
-        setProblems(res.data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.warn("Backend not running, falling back to mock data.", err);
-        // Fallback data if DB isn't up
-        setProblems([
-            { problemId: 1, title: 'Two Sum', difficulty: 'EASY', description: 'Given an array...' },
-            { problemId: 2, title: 'Add Two Numbers', difficulty: 'MEDIUM', description: 'Linked lists...' },
-            { problemId: 3, title: 'Longest Substring Without Repeating Characters', difficulty: 'MEDIUM', description: 'Strings...' },
-            { problemId: 4, title: 'Median of Two Sorted Arrays', difficulty: 'HARD', description: 'Arrays...' },
-            { problemId: 5, title: 'Valid Parentheses', difficulty: 'EASY', description: 'Stacks...' },
-            { problemId: 6, title: 'Merge Intervals', difficulty: 'MEDIUM', description: 'Sorting...' },
-            { problemId: 7, title: 'Trapping Rain Water', difficulty: 'HARD', description: 'Two Pointers...' },
-            { problemId: 8, title: 'Climbing Stairs', difficulty: 'EASY', description: 'DP...' },
-            { problemId: 9, title: 'Coin Change', difficulty: 'MEDIUM', description: 'DP...' },
-            { problemId: 10, title: 'N-Queens', difficulty: 'HARD', description: 'Backtracking...' }
-        ]);
-        setLoading(false);
-      });
+    problemAPI.getAll()
+      .then(res => { setProblems(res.data); setLoading(false); })
+      .catch(() => { setProblems(FALLBACK); setLoading(false); });
   }, []);
 
-  const getDifficultyColor = (diff: string) => {
-    switch (diff?.toUpperCase()) {
-      case 'EASY': return 'var(--success)';
-      case 'MEDIUM': return 'var(--warning)';
-      case 'HARD': return 'var(--error)';
-      default: return 'var(--text-primary)';
-    }
+  const filtered = problems.filter(p => {
+    const matchSearch = p.title.toLowerCase().includes(search.toLowerCase());
+    const matchDiff = diffFilter === 'ALL' || p.difficulty === diffFilter;
+    return matchSearch && matchDiff;
+  });
+
+  const counts = {
+    EASY: problems.filter(p => p.difficulty === 'EASY').length,
+    MEDIUM: problems.filter(p => p.difficulty === 'MEDIUM').length,
+    HARD: problems.filter(p => p.difficulty === 'HARD').length,
+  };
+
+  const getBadgeClass = (d: string) => {
+    switch (d) { case 'EASY': return 'badge-easy'; case 'MEDIUM': return 'badge-medium'; case 'HARD': return 'badge-hard'; default: return ''; }
   };
 
   return (
-    <div className="fade-in" style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
-      
-      {/* Header and Stats */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+    <div className="fade-in" style={{ padding: '2rem', maxWidth: '1100px', margin: '0 auto' }}>
+
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h1 style={{ fontSize: '2.5rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <BookOpen size={36} color="var(--accent-primary)" /> Problem Set
+          <h1 style={{ fontSize: '2rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+            <BookOpen size={28} color="var(--accent-primary)" /> Problem Set
           </h1>
-          <p style={{ color: 'var(--text-secondary)', marginTop: '0.5rem' }}>Master algorithmic reasoning across {problems.length || 10} structured challenges.</p>
+          <p style={{ color: 'var(--text-secondary)', marginTop: '0.3rem', fontSize: '0.9rem' }}>
+            {problems.length} problems across 3 difficulty levels
+          </p>
         </div>
-        <div style={{ display: 'flex', gap: '1.5rem' }}>
-          <div style={{ background: 'var(--bg-card)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', textAlign: 'center' }}>
-            <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--success)' }}>EASY</div>
-            <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{problems.filter(p => p.difficulty === 'EASY').length} problems</div>
-          </div>
-          <div style={{ background: 'var(--bg-card)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', textAlign: 'center' }}>
-            <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--warning)' }}>MED</div>
-            <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{problems.filter(p => p.difficulty === 'MEDIUM').length} problems</div>
-          </div>
-          <div style={{ background: 'var(--bg-card)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', textAlign: 'center' }}>
-            <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--error)' }}>HARD</div>
-            <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{problems.filter(p => p.difficulty === 'HARD').length} problems</div>
-          </div>
+        <div style={{ display: 'flex', gap: '0.75rem' }}>
+          {(['EASY', 'MEDIUM', 'HARD'] as const).map(d => (
+            <div key={d} className="glass-card" style={{ padding: '0.6rem 1rem', textAlign: 'center', cursor: 'pointer', minWidth: 70 }}
+              onClick={() => setDiffFilter(diffFilter === d ? 'ALL' : d)}>
+              <div style={{ fontSize: '1.1rem', fontWeight: 700, color: d === 'EASY' ? 'var(--success)' : d === 'MEDIUM' ? 'var(--warning)' : 'var(--error)' }}>{counts[d]}</div>
+              <div style={{ color: 'var(--text-muted)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: 1 }}>{d}</div>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* Toolbar */}
-      <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
-        <div style={{ flex: 1, position: 'relative' }}>
-          <Search size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
-          <input type="text" placeholder="Search problems..." style={{ width: '100%', padding: '0.75rem 1rem 0.75rem 2.5rem', background: 'var(--bg-card)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: 'white', outline: 'none' }} />
-        </div>
-        <button className="btn-secondary" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}><Filter size={18} /> Filters</button>
+      {/* Search */}
+      <div style={{ position: 'relative', marginBottom: '1.25rem' }}>
+        <Search size={16} style={{ position: 'absolute', left: '0.9rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+        <input className="input-field" type="text" placeholder="Search problems by title..."
+          value={search} onChange={e => setSearch(e.target.value)}
+          style={{ paddingLeft: '2.5rem' }} />
       </div>
+
+      {/* Difficulty filter indicator */}
+      {diffFilter !== 'ALL' && (
+        <div style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Filtering:</span>
+          <span className={getBadgeClass(diffFilter)}>{diffFilter}</span>
+          <button className="btn-ghost" onClick={() => setDiffFilter('ALL')} style={{ fontSize: '0.8rem', padding: '0.2rem 0.5rem' }}>Clear</button>
+        </div>
+      )}
 
       {/* Table */}
       <div className="glass-card" style={{ overflow: 'hidden' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead>
-            <tr style={{ background: 'rgba(0,0,0,0.2)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-              <th style={{ padding: '1rem', fontWeight: 600, color: 'var(--text-secondary)', width: '60px' }}>Status</th>
-              <th style={{ padding: '1rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Title</th>
-              <th style={{ padding: '1rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Acceptance</th>
-              <th style={{ padding: '1rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Difficulty</th>
+            <tr style={{ background: 'rgba(0,0,0,0.15)', borderBottom: '1px solid var(--border)' }}>
+              <th style={{ padding: '0.85rem 1rem', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: 1, width: 50 }}>
+                <CheckCircle2 size={14} />
+              </th>
+              <th style={{ padding: '0.85rem 1rem', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: 1 }}>Title</th>
+              <th style={{ padding: '0.85rem 1rem', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: 1 }}>Tests</th>
+              <th style={{ padding: '0.85rem 1rem', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: 1 }}>Difficulty</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={4} style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>Loading problems...</td></tr>
-            ) : problems.map((p) => (
-              <tr key={p.problemId} style={{ borderBottom: '1px solid rgba(255,255,255,0.02)', transition: 'background 0.2s' }} className="problem-row">
-                <td style={{ padding: '1rem' }}>-</td>
-                <td style={{ padding: '1rem' }}>
-                  <Link to={`/problem/${p.problemId}`} style={{ color: 'var(--text-primary)', textDecoration: 'none', fontWeight: 500, fontSize: '1.05rem', transition: 'color 0.2s' }}>
+              <tr><td colSpan={4} style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                <span className="spinner" style={{ marginRight: 8 }} /> Loading problems...
+              </td></tr>
+            ) : filtered.length === 0 ? (
+              <tr><td colSpan={4} style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                No problems found.
+              </td></tr>
+            ) : filtered.map((p) => (
+              <tr key={p.problemId} className="table-row" style={{ borderBottom: '1px solid var(--border)' }}>
+                <td style={{ padding: '0.85rem 1rem', color: 'var(--text-muted)' }}>—</td>
+                <td style={{ padding: '0.85rem 1rem' }}>
+                  <Link to={`/problem/${p.problemId}`} style={{ color: 'var(--text-primary)', fontWeight: 500, transition: 'color 0.2s' }}>
                     {p.problemId}. {p.title}
                   </Link>
                 </td>
-                <td style={{ padding: '1rem', color: 'var(--text-secondary)' }}>{(Math.random() * (70 - 20) + 20).toFixed(1)}%</td>
-                <td style={{ padding: '1rem', color: getDifficultyColor(p.difficulty), fontWeight: 600, letterSpacing: '0.5px' }}>{p.difficulty}</td>
+                <td style={{ padding: '0.85rem 1rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                  {p.testCaseCount} cases
+                </td>
+                <td style={{ padding: '0.85rem 1rem' }}>
+                  <span className={getBadgeClass(p.difficulty)}>{p.difficulty}</span>
+                </td>
               </tr>
             ))}
           </tbody>

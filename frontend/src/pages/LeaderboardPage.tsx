@@ -1,41 +1,105 @@
-import React, { useState } from 'react';
-import { Trophy } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Trophy, Medal, Crown } from 'lucide-react';
+import { leaderboardAPI } from '../services/api';
+
+interface LeaderboardEntry {
+  rank: number;
+  userId: number;
+  userName: string;
+  totalScore: number;
+  problemsSolved: number;
+}
+
+const FALLBACK: LeaderboardEntry[] = [
+  { rank: 1, userId: 1, userName: 'Admin', totalScore: 0, problemsSolved: 0 },
+  { rank: 2, userId: 2, userName: 'Anishka Khurana', totalScore: 0, problemsSolved: 0 },
+];
 
 const LeaderboardPage = () => {
-  const [users] = useState([
-    { rank: 1, name: 'Anishka Khurana', score: 2500, solved: 450 },
-    { rank: 2, name: 'Alex Johnson', score: 2340, solved: 410 },
-    { rank: 3, name: 'Jane Doe', score: 2120, solved: 380 },
-    { rank: 4, name: 'John Smith', score: 1980, solved: 320 },
-    { rank: 5, name: 'Alice Walker', score: 1850, solved: 290 },
-  ]);
+  const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    leaderboardAPI.getAll()
+      .then(res => { setEntries(res.data); setLoading(false); })
+      .catch(() => { setEntries(FALLBACK); setLoading(false); });
+  }, []);
+
+  const getRankDecoration = (rank: number) => {
+    if (rank === 1) return <Crown size={20} color="#fbbf24" />;
+    if (rank === 2) return <Medal size={18} color="#d1d5db" />;
+    if (rank === 3) return <Medal size={18} color="#d97706" />;
+    return <span style={{ color: 'var(--text-muted)', fontWeight: 600, width: 20, textAlign: 'center', display: 'inline-block' }}>{rank}</span>;
+  };
 
   return (
-    <div className="fade-in" style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', justifyContent: 'center', marginBottom: '3rem' }}>
-        <Trophy size={48} color="var(--warning)" />
-        <h1 style={{ fontSize: '3rem', fontWeight: 800 }}>Global Leaderboard</h1>
+    <div className="fade-in" style={{ padding: '2rem', maxWidth: '850px', margin: '0 auto' }}>
+
+      {/* Header */}
+      <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+        <div style={{
+          background: 'linear-gradient(135deg, rgba(251,191,36,0.1), rgba(245,158,11,0.05))',
+          width: 56, height: 56, borderRadius: '14px',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          margin: '0 auto 0.75rem', border: '1px solid rgba(251,191,36,0.15)',
+        }}>
+          <Trophy size={28} color="var(--warning)" />
+        </div>
+        <h1 style={{ fontSize: '2rem', fontWeight: 800 }}>Global Leaderboard</h1>
+        <p style={{ color: 'var(--text-secondary)', marginTop: '0.3rem', fontSize: '0.9rem' }}>
+          Rankings update automatically on each accepted submission
+        </p>
       </div>
 
+      {/* Table */}
       <div className="glass-card" style={{ overflow: 'hidden' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead>
-            <tr style={{ background: 'rgba(0,0,0,0.3)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-              <th style={{ padding: '1.5rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Rank</th>
-              <th style={{ padding: '1.5rem', fontWeight: 600, color: 'var(--text-secondary)' }}>User</th>
-              <th style={{ padding: '1.5rem', fontWeight: 600, color: 'var(--text-secondary)', textAlign: 'right' }}>Score</th>
-              <th style={{ padding: '1.5rem', fontWeight: 600, color: 'var(--text-secondary)', textAlign: 'right' }}>Solved</th>
+            <tr style={{ background: 'rgba(0,0,0,0.15)', borderBottom: '1px solid var(--border)' }}>
+              <th style={{ padding: '1rem', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: 1, width: 70 }}>Rank</th>
+              <th style={{ padding: '1rem', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: 1 }}>User</th>
+              <th style={{ padding: '1rem', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: 1, textAlign: 'right' }}>Solved</th>
+              <th style={{ padding: '1rem', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: 1, textAlign: 'right' }}>Score</th>
             </tr>
           </thead>
           <tbody>
-            {users.map((u, i) => (
-              <tr key={u.rank} style={{ borderBottom: '1px solid rgba(255,255,255,0.02)', transition: 'background 0.2s', background: i === 0 ? 'rgba(245, 158, 11, 0.05)' : 'transparent' }}>
-                <td style={{ padding: '1.5rem', fontWeight: 700, color: i < 3 ? 'var(--warning)' : 'var(--text-primary)' }}>
-                  #{u.rank}
+            {loading ? (
+              <tr><td colSpan={4} style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                <span className="spinner" style={{ marginRight: 8 }} /> Loading leaderboard...
+              </td></tr>
+            ) : entries.length === 0 ? (
+              <tr><td colSpan={4} style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                No submissions yet. Be the first to solve a problem!
+              </td></tr>
+            ) : entries.map((e) => (
+              <tr key={e.userId} className="table-row" style={{
+                borderBottom: '1px solid var(--border)',
+                background: e.rank === 1 ? 'rgba(251,191,36,0.03)' : 'transparent',
+              }}>
+                <td style={{ padding: '1rem', paddingLeft: '1.25rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    {getRankDecoration(e.rank)}
+                  </div>
                 </td>
-                <td style={{ padding: '1.5rem', fontWeight: 600 }}>{u.name}</td>
-                <td style={{ padding: '1.5rem', textAlign: 'right', color: 'var(--accent-primary)', fontWeight: 700 }}>{u.score}</td>
-                <td style={{ padding: '1.5rem', textAlign: 'right', color: 'var(--text-secondary)' }}>{u.solved}</td>
+                <td style={{ padding: '1rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <div style={{
+                      width: 32, height: 32, borderRadius: '50%',
+                      background: `linear-gradient(135deg, hsl(${e.userId * 60}, 70%, 50%), hsl(${e.userId * 60 + 40}, 70%, 40%))`,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: '0.75rem', fontWeight: 700, color: 'white',
+                    }}>
+                      {e.userName.charAt(0).toUpperCase()}
+                    </div>
+                    <span style={{ fontWeight: 600 }}>{e.userName}</span>
+                  </div>
+                </td>
+                <td style={{ padding: '1rem', textAlign: 'right', color: 'var(--text-secondary)' }}>
+                  {e.problemsSolved}
+                </td>
+                <td style={{ padding: '1rem', textAlign: 'right', fontWeight: 700, color: 'var(--accent-primary)' }}>
+                  {e.totalScore}
+                </td>
               </tr>
             ))}
           </tbody>
