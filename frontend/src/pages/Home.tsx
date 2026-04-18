@@ -1,114 +1,90 @@
 import { Link } from 'react-router-dom';
-import { Zap, Shield, Activity, Code2, ChevronRight, Users, Award } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { Zap, Lock, Trophy, Building2, BarChart3, Puzzle, ArrowRight, Code2 } from 'lucide-react';
 
 const Home = () => {
+  const { isAuthenticated } = useAuth();
+
+  const features = [
+    { title: 'Judge Engine', desc: 'Strategy + Factory patterns power automatic code evaluation across Java, Python, and C++.', Icon: Zap, color: 'var(--lc-brand)' },
+    { title: 'JWT Authentication', desc: 'Secure role-based access control — users solve problems, admins manage the platform.', Icon: Lock, color: 'var(--lc-easy)' },
+    { title: 'Live Leaderboard', desc: 'Observer Pattern triggers instant ranking updates. Scores scale with problem difficulty.', Icon: Trophy, color: 'var(--lc-medium)' },
+    { title: 'Clean Architecture', desc: 'Controllers → Services → Models. TypeScript everywhere with proper OOP patterns.', Icon: Building2, color: 'var(--lc-hard)' },
+    { title: 'Profile & Stats', desc: 'Track your progress with donut charts, submission heatmaps, and difficulty breakdowns.', Icon: BarChart3, color: '#a855f7' },
+    { title: 'Design Patterns', desc: 'Strategy, Factory, Singleton, and Observer patterns implemented across the backend.', Icon: Puzzle, color: '#0a84ff' },
+  ];
+
   return (
-    <div className="fade-in" style={{ maxWidth: '1100px', margin: '0 auto', padding: '3rem 2rem 5rem' }}>
-
-      {/* ── Hero ─────────────────────────────────────────── */}
-      <section style={{ textAlign: 'center', marginTop: '3rem', marginBottom: '5rem' }}>
-        <div style={{
-          display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-          padding: '0.3rem 1rem', background: 'rgba(59, 130, 246, 0.08)',
-          borderRadius: '20px', fontSize: '0.8rem', fontWeight: 600,
-          color: 'var(--accent-primary)', border: '1px solid rgba(59,130,246,0.15)',
-          marginBottom: '1.5rem',
-        }}>
-          <Zap size={14} /> 20 Algorithmic Challenges Available
-        </div>
-
-        <h1 style={{
-          fontSize: 'clamp(2.5rem, 5vw, 4rem)', fontWeight: 800, lineHeight: 1.1,
-          marginBottom: '1.25rem',
-          background: 'linear-gradient(135deg, #fff 0%, #94a3b8 100%)',
-          WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-        }}>
-          Forge Your Code.<br />Prove Your Logic.
-        </h1>
-
-        <p style={{
-          fontSize: '1.15rem', color: 'var(--text-secondary)', maxWidth: '560px',
-          margin: '0 auto 2rem', lineHeight: 1.7,
-        }}>
-          An online judge platform where you write code, fight test cases,
-          and climb the leaderboard. Built with Spring Boot and React.
-        </p>
-
-        <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-          <Link to="/problems">
-            <button className="btn-primary" style={{
-              padding: '0.85rem 2rem', fontSize: '1rem',
-              display: 'flex', alignItems: 'center', gap: '0.5rem',
-            }}>
-              Start Solving <ChevronRight size={18} />
-            </button>
-          </Link>
-          <Link to="/leaderboard">
-            <button className="btn-secondary" style={{ padding: '0.85rem 2rem', fontSize: '1rem' }}>
-              View Rankings
-            </button>
-          </Link>
-        </div>
-      </section>
-
-      {/* ── Stats ────────────────────────────────────────── */}
-      <section style={{
-        display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem',
-        marginBottom: '4rem',
+    <div className="fade-in">
+      {/* Hero */}
+      <div style={{
+        background: 'linear-gradient(135deg, #282828 0%, #1a1a1a 100%)',
+        borderBottom: '1px solid var(--lc-border)',
+        padding: '50px 0',
       }}>
-        {[
-          { icon: <Code2 size={22} />, value: '20', label: 'Coding Problems', color: 'var(--accent-primary)' },
-          { icon: <Users size={22} />, value: '3', label: 'Languages Supported', color: 'var(--accent-purple)' },
-          { icon: <Award size={22} />, value: '∞', label: 'Submissions', color: 'var(--success)' },
-        ].map((stat, i) => (
-          <div key={i} className="glass-card" style={{
-            padding: '1.5rem', textAlign: 'center',
-            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem',
-          }}>
-            <div style={{ color: stat.color }}>{stat.icon}</div>
-            <div style={{ fontSize: '2rem', fontWeight: 800, color: stat.color }}>{stat.value}</div>
-            <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{stat.label}</div>
-          </div>
-        ))}
-      </section>
-
-      {/* ── Features ─────────────────────────────────────── */}
-      <section style={{
-        display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-        gap: '1.5rem',
-      }}>
-        {[
-          {
-            icon: <Zap size={28} color="var(--accent-primary)" />,
-            title: 'Automated Judge Engine',
-            desc: 'Submit code in Java, Python, or C++ and get instant verdicts — Accepted, Wrong Answer, TLE, or Compilation Error.',
-          },
-          {
-            icon: <Shield size={28} color="var(--success)" />,
-            title: 'JWT Authentication',
-            desc: 'Secure role-based access with JWT. Users solve problems, admins manage the platform. Every request is authenticated.',
-          },
-          {
-            icon: <Activity size={28} color="var(--accent-purple)" />,
-            title: 'Live Leaderboard',
-            desc: 'Observer Pattern triggers instant leaderboard updates on each accepted submission. Scores scale with difficulty.',
-          },
-        ].map((feat, i) => (
-          <div key={i} className="glass-card slide-up" style={{
-            padding: '2rem', display: 'flex', flexDirection: 'column', gap: '0.75rem',
-            animationDelay: `${i * 0.1}s`, animationFillMode: 'backwards',
-          }}>
-            <div style={{
-              background: 'rgba(255,255,255,0.03)', padding: '0.75rem',
-              borderRadius: '10px', width: 'fit-content',
-            }}>
-              {feat.icon}
+        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 16px', display: 'flex', alignItems: 'center', gap: 50 }}>
+          <div style={{ flex: 1 }}>
+            <h1 style={{ fontSize: 42, fontWeight: 800, lineHeight: 1.15, marginBottom: 16 }}>
+              A New Way to Learn <span style={{ color: 'var(--lc-brand)' }}>Algorithms</span>
+            </h1>
+            <p style={{ color: 'var(--lc-text-secondary)', fontSize: 16, lineHeight: 1.7, marginBottom: 24, maxWidth: 500 }}>
+              CodeForge is the best platform to help you enhance your skills, expand your knowledge,
+              and prepare for technical interviews.
+            </p>
+            <div style={{ display: 'flex', gap: 12 }}>
+              <Link to={isAuthenticated ? '/problems' : '/auth'}>
+                <button className="lc-btn-primary" style={{ padding: '10px 28px', fontSize: 15, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  {isAuthenticated ? 'Start Solving' : 'Create Account'} <ArrowRight size={16} />
+                </button>
+              </Link>
+              <Link to="/problems">
+                <button className="lc-btn" style={{ padding: '10px 28px', fontSize: 15 }}>
+                  Explore Problems
+                </button>
+              </Link>
             </div>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 600 }}>{feat.title}</h3>
-            <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, fontSize: '0.9rem' }}>{feat.desc}</p>
           </div>
-        ))}
-      </section>
+
+          {/* Stats */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, flexShrink: 0 }}>
+            {[
+              { val: '120', label: 'Coding Problems', color: 'var(--lc-brand)', Icon: Code2 },
+              { val: '3', label: 'Languages', color: 'var(--lc-easy)', Icon: Zap },
+              { val: '3', label: 'Difficulty Levels', color: 'var(--lc-hard)', Icon: BarChart3 },
+            ].map((s, i) => (
+              <div key={i} style={{
+                background: 'var(--lc-bg-layer1)', borderRadius: 'var(--radius)',
+                padding: '16px 24px', display: 'flex', alignItems: 'center', gap: 16,
+                border: '1px solid var(--lc-border)', minWidth: 260,
+              }}>
+                <s.Icon size={24} color={s.color} />
+                <span style={{ fontSize: 28, fontWeight: 800, color: s.color }}>{s.val}</span>
+                <span style={{ color: 'var(--lc-text-secondary)', fontSize: 14 }}>{s.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Features */}
+      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '40px 16px' }}>
+        <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 24 }}>Platform Features</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+          {features.map((f, i) => (
+            <div key={i} style={{
+              background: 'var(--lc-bg-layer1)', borderRadius: 'var(--radius)',
+              padding: 24, border: '1px solid var(--lc-border)',
+              transition: 'border-color 0.2s', cursor: 'default',
+            }}
+            onMouseEnter={e => (e.currentTarget.style.borderColor = f.color)}
+            onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--lc-border)')}>
+              <f.Icon size={28} color={f.color} style={{ marginBottom: 12 }} />
+              <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 8, color: f.color }}>{f.title}</div>
+              <div style={{ color: 'var(--lc-text-secondary)', fontSize: 13, lineHeight: 1.6 }}>{f.desc}</div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };

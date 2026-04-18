@@ -7,25 +7,25 @@ import Ide from './pages/Ide';
 import LeaderboardPage from './pages/LeaderboardPage';
 import AuthPage from './pages/AuthPage';
 import SubmissionHistory from './pages/SubmissionHistory';
+import Profile from './pages/Profile';
 import './index.css';
 
 function App() {
   return (
     <AuthProvider>
       <Router>
-        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-          <Navbar />
-          <main style={{ flex: 1 }}>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/problems" element={<ProblemList />} />
-              <Route path="/problem/:id" element={<Ide />} />
-              <Route path="/leaderboard" element={<LeaderboardPage />} />
-              <Route path="/auth" element={<AuthPage />} />
-              <Route path="/submissions" element={<SubmissionHistory />} />
-            </Routes>
-          </main>
-        </div>
+        <Navbar />
+        <main style={{ flex: 1 }}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/problems" element={<ProblemList />} />
+            <Route path="/problem/:id" element={<Ide />} />
+            <Route path="/leaderboard" element={<LeaderboardPage />} />
+            <Route path="/auth" element={<AuthPage />} />
+            <Route path="/submissions" element={<SubmissionHistory />} />
+            <Route path="/profile" element={<Profile />} />
+          </Routes>
+        </main>
       </Router>
     </AuthProvider>
   );

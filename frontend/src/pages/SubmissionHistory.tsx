@@ -2,103 +2,82 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { submissionAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { History, CheckCircle2, XCircle, Clock, AlertTriangle } from 'lucide-react';
+import { CheckCircle2, XCircle, Clock, AlertCircle } from 'lucide-react';
 
 interface Submission {
-  submissionId: number;
-  problemId: number;
-  problemTitle: string;
-  language: string;
-  verdict: string;
-  runtime: number;
-  submittedAt: string;
+  submissionId: number; problemId: number; problemTitle: string;
+  language: string; verdict: string; runtime: number; submittedAt: string;
 }
 
 const SubmissionHistory = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/auth');
-      return;
-    }
+    if (authLoading) return; // Wait for auth to initialize
+    if (!isAuthenticated) { navigate('/auth'); return; }
     submissionAPI.getMySubmissions()
       .then(res => { setSubmissions(res.data); setLoading(false); })
       .catch(() => setLoading(false));
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, authLoading, navigate]);
 
   const getVerdictIcon = (v: string) => {
-    switch (v) {
-      case 'ACCEPTED': return <CheckCircle2 size={16} color="var(--success)" />;
-      case 'WRONG_ANSWER': return <XCircle size={16} color="var(--error)" />;
-      case 'TLE': return <Clock size={16} color="var(--warning)" />;
-      default: return <AlertTriangle size={16} color="var(--accent-purple)" />;
-    }
+    if (v === 'ACCEPTED') return <CheckCircle2 size={14} color="var(--lc-accepted)" />;
+    if (v === 'WRONG_ANSWER') return <XCircle size={14} color="var(--lc-wrong)" />;
+    if (v === 'TLE') return <Clock size={14} color="var(--lc-medium)" />;
+    return <AlertCircle size={14} color="var(--lc-text-muted)" />;
   };
 
-  const getVerdictClass = (v: string) => {
-    switch (v) {
-      case 'ACCEPTED': return 'verdict-accepted';
-      case 'WRONG_ANSWER': return 'verdict-wrong';
-      case 'TLE': return 'verdict-tle';
-      default: return 'verdict-ce';
-    }
+  const verdictColor = (v: string) => {
+    if (v === 'ACCEPTED') return 'var(--lc-accepted)';
+    if (v === 'WRONG_ANSWER') return 'var(--lc-wrong)';
+    if (v === 'TLE') return 'var(--lc-medium)';
+    return 'var(--lc-text-muted)';
   };
+
+  if (authLoading) return <div style={{ display: 'flex', justifyContent: 'center', padding: 80 }}><span className="spinner" /></div>;
 
   return (
-    <div className="fade-in" style={{ padding: '2rem', maxWidth: '1000px', margin: '0 auto' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', marginBottom: '1.5rem' }}>
-        <History size={28} color="var(--accent-primary)" />
-        <h1 style={{ fontSize: '2rem', fontWeight: 700 }}>My Submissions</h1>
-      </div>
+    <div className="fade-in" style={{ maxWidth: 900, margin: '0 auto', padding: '24px 16px' }}>
+      <div style={{ fontSize: 22, fontWeight: 700, marginBottom: 20 }}>My Submissions</div>
 
-      <div className="glass-card" style={{ overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-          <thead>
-            <tr style={{ background: 'rgba(0,0,0,0.15)', borderBottom: '1px solid var(--border)' }}>
-              <th style={{ padding: '0.85rem 1rem', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: 1 }}>Problem</th>
-              <th style={{ padding: '0.85rem 1rem', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: 1 }}>Language</th>
-              <th style={{ padding: '0.85rem 1rem', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: 1 }}>Verdict</th>
-              <th style={{ padding: '0.85rem 1rem', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: 1, textAlign: 'right' }}>Runtime</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr><td colSpan={4} style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                <span className="spinner" style={{ marginRight: 8 }} /> Loading...
-              </td></tr>
-            ) : submissions.length === 0 ? (
-              <tr><td colSpan={4} style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                No submissions yet. <Link to="/problems" style={{ color: 'var(--accent-primary)' }}>Start solving!</Link>
-              </td></tr>
-            ) : submissions.map((s) => (
-              <tr key={s.submissionId} className="table-row" style={{ borderBottom: '1px solid var(--border)' }}>
-                <td style={{ padding: '0.85rem 1rem' }}>
-                  <Link to={`/problem/${s.problemId}`} style={{ color: 'var(--text-primary)', fontWeight: 500 }}>
-                    {s.problemTitle}
-                  </Link>
-                </td>
-                <td style={{ padding: '0.85rem 1rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                  {s.language}
-                </td>
-                <td style={{ padding: '0.85rem 1rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    {getVerdictIcon(s.verdict)}
-                    <span className={getVerdictClass(s.verdict)} style={{ fontWeight: 600, fontSize: '0.9rem' }}>
-                      {s.verdict.replace('_', ' ')}
-                    </span>
-                  </div>
-                </td>
-                <td style={{ padding: '0.85rem 1rem', textAlign: 'right', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                  {s.runtime?.toFixed(2) || '—'} ms
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div style={{ background: 'var(--lc-bg-layer1)', borderRadius: 'var(--radius)', overflow: 'hidden' }}>
+        <div style={{
+          display: 'grid', gridTemplateColumns: '1fr 90px 140px 80px',
+          padding: '12px 20px', borderBottom: '1px solid var(--lc-border)',
+          color: 'var(--lc-text-muted)', fontSize: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5,
+        }}>
+          <span>Problem</span><span>Language</span><span>Verdict</span><span style={{ textAlign: 'right' }}>Runtime</span>
+        </div>
+
+        {loading ? (
+          <div style={{ padding: 40, textAlign: 'center', color: 'var(--lc-text-muted)' }}><span className="spinner" /></div>
+        ) : submissions.length === 0 ? (
+          <div style={{ padding: 40, textAlign: 'center', color: 'var(--lc-text-muted)' }}>
+            No submissions yet. <Link to="/problems" style={{ color: 'var(--lc-brand)' }}>Start solving!</Link>
+          </div>
+        ) : submissions.map(s => (
+          <Link to={`/problem/${s.problemId}`} key={s.submissionId} style={{ display: 'block' }}>
+            <div style={{
+              display: 'grid', gridTemplateColumns: '1fr 90px 140px 80px',
+              padding: '12px 20px', borderBottom: '1px solid var(--lc-border)',
+              alignItems: 'center', transition: 'background 0.1s', cursor: 'pointer',
+            }}
+            onMouseEnter={e => (e.currentTarget.style.background = 'var(--lc-bg-hover)')}
+            onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+              <span style={{ fontWeight: 500, fontSize: 14 }}>{s.problemTitle}</span>
+              <span style={{ color: 'var(--lc-text-muted)', fontSize: 13 }}>{s.language}</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 6, color: verdictColor(s.verdict), fontWeight: 600, fontSize: 13 }}>
+                {getVerdictIcon(s.verdict)} {s.verdict.replace('_', ' ')}
+              </span>
+              <span style={{ textAlign: 'right', color: 'var(--lc-text-muted)', fontSize: 13 }}>
+                {s.runtime?.toFixed(1) || '—'} ms
+              </span>
+            </div>
+          </Link>
+        ))}
       </div>
     </div>
   );

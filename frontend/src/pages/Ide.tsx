@@ -1,30 +1,20 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
-import { Play, Send, ChevronLeft, Clock, CheckCircle2, XCircle, AlertTriangle } from 'lucide-react';
 import { problemAPI, submissionAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { ArrowLeft, Play, RotateCcw, ChevronDown, Terminal } from 'lucide-react';
 
 interface ProblemDetail {
-  problemId: number;
-  title: string;
-  description: string;
-  difficulty: string;
-  constraints: string;
+  problemId: number; title: string; description: string;
+  difficulty: string; constraints: string;
   examples: { input: string; expectedOutput: string }[];
-}
-
-interface SubmissionResult {
-  submissionId: number;
-  verdict: string;
-  runtime: number;
-  language: string;
 }
 
 const BOILERPLATE: Record<string, string> = {
   java: 'import java.util.*;\n\nclass Solution {\n    public int[] twoSum(int[] nums, int target) {\n        // Write your code here\n        return new int[]{};\n    }\n}',
-  python: 'class Solution:\n    def twoSum(self, nums: list[int], target: int) -> list[int]:\n        # Write your code here\n        pass',
-  cpp: '#include <vector>\nusing namespace std;\n\nclass Solution {\npublic:\n    vector<int> twoSum(vector<int>& nums, int target) {\n        // Write your code here\n        return {};\n    }\n};',
+  python: 'class Solution:\n    def solve(self, *args):\n        # Write your code here\n        pass\n',
+  cpp: '#include <vector>\nusing namespace std;\n\nclass Solution {\npublic:\n    vector<int> solve(vector<int>& nums) {\n        // Write your code here\n        return {};\n    }\n};',
 };
 
 const Ide = () => {
@@ -32,37 +22,18 @@ const Ide = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const [problem, setProblem] = useState<ProblemDetail | null>(null);
-  const [language, setLanguage] = useState('java');
-  const [code, setCode] = useState(BOILERPLATE.java);
+  const [language, setLanguage] = useState('python');
+  const [code, setCode] = useState(BOILERPLATE.python);
   const [submitting, setSubmitting] = useState(false);
-  const [result, setResult] = useState<SubmissionResult | null>(null);
-  const [history, setHistory] = useState<SubmissionResult[]>([]);
+  const [result, setResult] = useState<any>(null);
+  const [history, setHistory] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<'description' | 'submissions'>('description');
 
   useEffect(() => {
     if (id) {
-      problemAPI.getById(Number(id))
-        .then(res => setProblem(res.data))
-        .catch(() => {
-          // Fallback for when backend is not running
-          setProblem({
-            problemId: Number(id),
-            title: 'Two Sum',
-            description: 'Given an array of integers `nums` and an integer `target`, return indices of the two numbers such that they add up to `target`.\n\nYou may assume that each input would have **exactly one solution**, and you may not use the same element twice.',
-            difficulty: 'EASY',
-            constraints: '2 <= nums.length <= 10^4\n-10^9 <= nums[i] <= 10^9',
-            examples: [
-              { input: '[2,7,11,15]\n9', expectedOutput: '[0,1]' },
-              { input: '[3,2,4]\n6', expectedOutput: '[1,2]' },
-            ],
-          });
-        });
-
-      // Load submission history for this problem
+      problemAPI.getById(Number(id)).then(res => setProblem(res.data)).catch(() => {});
       if (isAuthenticated) {
-        submissionAPI.getForProblem(Number(id))
-          .then(res => setHistory(res.data))
-          .catch(() => {});
+        submissionAPI.getForProblem(Number(id)).then(res => setHistory(res.data)).catch(() => {});
       }
     }
   }, [id, isAuthenticated]);
@@ -73,268 +44,207 @@ const Ide = () => {
   };
 
   const handleSubmit = async () => {
-    if (!isAuthenticated) {
-      navigate('/auth');
-      return;
-    }
+    if (!isAuthenticated) { navigate('/auth'); return; }
     setSubmitting(true);
     setResult(null);
     try {
-      const res = await submissionAPI.submit({
-        problemId: Number(id),
-        language,
-        code,
-      });
+      const res = await submissionAPI.submit({ problemId: Number(id), language, code });
       setResult(res.data);
-      // Refresh history
-      submissionAPI.getForProblem(Number(id))
-        .then(r => setHistory(r.data))
-        .catch(() => {});
+      submissionAPI.getForProblem(Number(id)).then(r => setHistory(r.data)).catch(() => {});
     } catch (err: any) {
-      setResult({
-        submissionId: 0,
-        verdict: err.response?.data?.error || 'ERROR',
-        runtime: 0,
-        language,
-      });
+      setResult({ verdict: err.response?.data?.error || 'ERROR', runtime: 0, language });
     } finally {
       setSubmitting(false);
     }
   };
 
-  const getVerdictIcon = (v: string) => {
-    switch (v) {
-      case 'ACCEPTED': return <CheckCircle2 size={16} color="var(--success)" />;
-      case 'WRONG_ANSWER': return <XCircle size={16} color="var(--error)" />;
-      case 'TLE': return <Clock size={16} color="var(--warning)" />;
-      default: return <AlertTriangle size={16} color="var(--accent-purple)" />;
-    }
-  };
-
-  const getVerdictClass = (v: string) => {
-    switch (v) {
-      case 'ACCEPTED': return 'verdict-accepted';
-      case 'WRONG_ANSWER': return 'verdict-wrong';
-      case 'TLE': return 'verdict-tle';
-      case 'PENDING': return 'verdict-pending';
-      default: return 'verdict-ce';
-    }
-  };
-
-  const getBadge = (d: string) => {
-    switch (d) { case 'EASY': return 'badge-easy'; case 'MEDIUM': return 'badge-medium'; case 'HARD': return 'badge-hard'; default: return ''; }
-  };
+  const getDiffClass = (d: string) => d === 'EASY' ? 'diff-easy' : d === 'MEDIUM' ? 'diff-medium' : 'diff-hard';
 
   if (!problem) {
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 'calc(100vh - 60px)' }}>
-        <span className="spinner" />
-      </div>
-    );
+    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 'calc(100vh - 50px)' }}><span className="spinner" /></div>;
   }
 
   return (
-    <div style={{ display: 'flex', height: 'calc(100vh - 53px)' }}>
+    <div style={{ display: 'flex', height: 'calc(100vh - 50px)' }}>
 
-      {/* ── Left Panel: Problem Description ─────────────── */}
+      {/* Left Panel — Problem Description */}
       <div style={{
-        width: '45%', minWidth: 350, display: 'flex', flexDirection: 'column',
-        borderRight: '1px solid var(--border)', background: 'var(--bg-darker)',
+        width: '45%', minWidth: 360, display: 'flex', flexDirection: 'column',
+        borderRight: '1px solid var(--lc-border)', background: 'var(--lc-bg)',
       }}>
-        {/* Tabs */}
-        <div style={{
-          display: 'flex', borderBottom: '1px solid var(--border)',
-          background: 'rgba(0,0,0,0.2)',
-        }}>
-          <button onClick={() => navigate('/problems')} className="btn-ghost"
-            style={{ padding: '0.7rem 0.75rem', borderRight: '1px solid var(--border)' }}>
-            <ChevronLeft size={16} />
+        <div style={{ display: 'flex', borderBottom: '1px solid var(--lc-border)', background: 'var(--lc-bg-layer1)' }}>
+          <button onClick={() => navigate('/problems')} className="lc-btn"
+            style={{ borderRadius: 0, border: 'none', borderRight: '1px solid var(--lc-border)', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <ArrowLeft size={14} /> Back
           </button>
           {(['description', 'submissions'] as const).map(tab => (
             <button key={tab} onClick={() => setActiveTab(tab)}
               style={{
-                padding: '0.7rem 1.25rem', background: 'transparent', border: 'none',
-                borderBottom: activeTab === tab ? '2px solid var(--accent-primary)' : '2px solid transparent',
-                color: activeTab === tab ? 'var(--text-primary)' : 'var(--text-muted)',
-                fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', fontFamily: 'inherit',
-                textTransform: 'capitalize',
+                padding: '10px 18px', background: 'none', border: 'none',
+                borderBottom: activeTab === tab ? '2px solid var(--lc-brand)' : '2px solid transparent',
+                color: activeTab === tab ? 'var(--lc-text)' : 'var(--lc-text-muted)',
+                fontWeight: activeTab === tab ? 600 : 400, fontSize: 13,
+                cursor: 'pointer', fontFamily: 'inherit', textTransform: 'capitalize',
               }}>
               {tab}
             </button>
           ))}
         </div>
 
-        <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem' }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px' }}>
           {activeTab === 'description' ? (
             <>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-                <h1 style={{ fontSize: '1.5rem', fontWeight: 700 }}>{problem.problemId}. {problem.title}</h1>
-                <span className={getBadge(problem.difficulty)}>{problem.difficulty}</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+                <span style={{ fontSize: 20, fontWeight: 700 }}>{problem.problemId}. {problem.title}</span>
+                <span className={getDiffClass(problem.difficulty)} style={{ fontSize: 13, fontWeight: 500 }}>
+                  {problem.difficulty === 'EASY' ? 'Easy' : problem.difficulty === 'MEDIUM' ? 'Medium' : 'Hard'}
+                </span>
               </div>
 
-              <div style={{ color: 'var(--text-secondary)', lineHeight: 1.8, fontSize: '0.95rem', marginBottom: '1.5rem' }}>
+              <div style={{ color: 'var(--lc-text-secondary)', lineHeight: 1.8, fontSize: 14, marginBottom: 20 }}>
                 {problem.description.split('\n').map((line, i) => (
-                  <p key={i} style={{ marginBottom: line ? '0.5rem' : '0.75rem' }}>
+                  <p key={i} style={{ marginBottom: line ? 6 : 12 }}>
                     {line.split('`').map((part, j) =>
                       j % 2 === 1 ? <code key={j} className="code-font" style={{
-                        background: 'rgba(59,130,246,0.1)', padding: '0.1rem 0.4rem',
-                        borderRadius: '4px', fontSize: '0.85rem', color: 'var(--accent-primary)',
+                        background: 'var(--lc-bg-layer2)', padding: '1px 6px',
+                        borderRadius: 4, fontSize: 13, color: 'var(--lc-brand)',
                       }}>{part}</code> : part
                     )}
                   </p>
                 ))}
               </div>
 
-              {/* Examples */}
               {problem.examples.map((ex, i) => (
-                <div key={i} style={{ marginBottom: '1.25rem' }}>
-                  <h3 style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--text-muted)' }}>
-                    Example {i + 1}:
-                  </h3>
-                  <pre className="code-font" style={{
-                    background: 'rgba(15, 23, 42, 0.8)', padding: '1rem',
-                    borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)',
-                    fontSize: '0.85rem', lineHeight: 1.6, whiteSpace: 'pre-wrap',
+                <div key={i} style={{ marginBottom: 16 }}>
+                  <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 8 }}>Example {i + 1}:</div>
+                  <div className="code-font" style={{
+                    background: 'var(--lc-bg-layer1)', padding: 14, borderRadius: 'var(--radius)',
+                    border: '1px solid var(--lc-border)', fontSize: 13, lineHeight: 1.7, whiteSpace: 'pre-wrap',
                   }}>
-                    <span style={{ color: 'var(--text-muted)' }}>Input: </span>{ex.input}{'\n'}
-                    <span style={{ color: 'var(--text-muted)' }}>Output: </span><span style={{ color: 'var(--success)' }}>{ex.expectedOutput}</span>
-                  </pre>
+                    <span style={{ color: 'var(--lc-text-muted)' }}>Input: </span>{ex.input}{'\n'}
+                    <span style={{ color: 'var(--lc-text-muted)' }}>Output: </span><span style={{ color: 'var(--lc-accepted)' }}>{ex.expectedOutput}</span>
+                  </div>
                 </div>
               ))}
 
-              {/* Constraints */}
               {problem.constraints && (
-                <div style={{ marginTop: '1rem' }}>
-                  <h3 style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Constraints:</h3>
-                  <pre className="code-font" style={{
-                    background: 'rgba(15, 23, 42, 0.8)', padding: '0.75rem',
-                    borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)',
-                    fontSize: '0.8rem', lineHeight: 1.6, whiteSpace: 'pre-wrap', color: 'var(--text-secondary)',
-                  }}>
-                    {problem.constraints}
-                  </pre>
+                <div style={{ marginTop: 12 }}>
+                  <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 8 }}>Constraints:</div>
+                  <div className="code-font" style={{
+                    background: 'var(--lc-bg-layer1)', padding: 12, borderRadius: 'var(--radius)',
+                    border: '1px solid var(--lc-border)', fontSize: 12, lineHeight: 1.7,
+                    whiteSpace: 'pre-wrap', color: 'var(--lc-text-secondary)',
+                  }}>{problem.constraints}</div>
                 </div>
               )}
             </>
           ) : (
-            /* Submissions Tab */
             <div>
-              <h2 style={{ fontSize: '1.2rem', fontWeight: 600, marginBottom: '1rem' }}>Submission History</h2>
+              <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>Submission History</div>
               {!isAuthenticated ? (
-                <p style={{ color: 'var(--text-muted)' }}>Please sign in to view submissions.</p>
+                <div style={{ color: 'var(--lc-text-muted)' }}>Please sign in to view submissions.</div>
               ) : history.length === 0 ? (
-                <p style={{ color: 'var(--text-muted)' }}>No submissions yet for this problem.</p>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                  {history.map((s, i) => (
-                    <div key={i} className="glass-card" style={{
-                      padding: '0.75rem 1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                    }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        {getVerdictIcon(s.verdict)}
-                        <span className={getVerdictClass(s.verdict)} style={{ fontWeight: 600, fontSize: '0.9rem' }}>
-                          {s.verdict.replace('_', ' ')}
-                        </span>
-                      </div>
-                      <div style={{ display: 'flex', gap: '1rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-                        <span>{s.language}</span>
-                        <span>{s.runtime?.toFixed(2) || '—'} ms</span>
-                      </div>
-                    </div>
-                  ))}
+                <div style={{ color: 'var(--lc-text-muted)' }}>No submissions yet for this problem.</div>
+              ) : history.map((s: any, i: number) => (
+                <div key={i} style={{
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                  padding: '10px 14px', background: 'var(--lc-bg-layer1)',
+                  borderRadius: 'var(--radius)', marginBottom: 6, border: '1px solid var(--lc-border)',
+                }}>
+                  <span style={{
+                    fontWeight: 600, fontSize: 13,
+                    color: s.verdict === 'ACCEPTED' ? 'var(--lc-accepted)' : 'var(--lc-wrong)',
+                  }}>
+                    {s.verdict.replace('_', ' ')}
+                  </span>
+                  <div style={{ display: 'flex', gap: 12, color: 'var(--lc-text-muted)', fontSize: 12 }}>
+                    <span>{s.language}</span>
+                    <span>{s.runtime?.toFixed(1)} ms</span>
+                  </div>
                 </div>
-              )}
+              ))}
             </div>
           )}
         </div>
       </div>
 
-      {/* ── Right Panel: Code Editor ───────────────────── */}
+      {/* Right Panel — Code Editor */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#1e1e1e' }}>
-
         {/* Toolbar */}
         <div style={{
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          padding: '0.4rem 0.75rem', background: '#252526',
-          borderBottom: '1px solid #333',
+          padding: '6px 12px', background: '#252526', borderBottom: '1px solid #333',
         }}>
-          <select value={language} onChange={e => handleLanguageChange(e.target.value)}
-            style={{
-              background: '#3c3c3c', color: 'white', border: '1px solid #555',
-              padding: '0.3rem 0.6rem', borderRadius: '4px', outline: 'none',
-              fontFamily: 'inherit', fontSize: '0.85rem',
-            }}>
-            <option value="java">Java</option>
-            <option value="python">Python</option>
-            <option value="cpp">C++</option>
-          </select>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <select value={language} onChange={e => handleLanguageChange(e.target.value)}
+              style={{
+                background: '#3c3c3c', color: 'white', border: '1px solid #555',
+                padding: '4px 10px', borderRadius: 4, fontSize: 13, fontFamily: 'inherit', outline: 'none',
+              }}>
+              <option value="python">Python</option>
+              <option value="java">Java</option>
+              <option value="cpp">C++</option>
+            </select>
+          </div>
 
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button onClick={handleSubmit} disabled={submitting}
-              className="btn-success"
-              style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              {submitting ? <span className="spinner" /> : <Send size={14} />}
-              {submitting ? 'Judging...' : 'Submit'}
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button className="lc-btn" onClick={() => setCode(BOILERPLATE[language])}
+              style={{ padding: '4px 12px', fontSize: 12, display: 'flex', alignItems: 'center', gap: 4 }}>
+              <RotateCcw size={12} /> Reset
+            </button>
+            <button className="lc-btn-success" onClick={handleSubmit} disabled={submitting}
+              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 14px', fontSize: 13 }}>
+              {submitting ? <span className="spinner" /> : <Play size={14} />} Submit
             </button>
           </div>
         </div>
 
         {/* Monaco Editor */}
         <div style={{ flex: 1 }}>
-          <Editor
-            height="100%"
-            language={language === 'cpp' ? 'cpp' : language}
-            theme="vs-dark"
-            value={code}
-            onChange={(val) => setCode(val || '')}
-            options={{
-              minimap: { enabled: false },
-              fontSize: 14,
-              fontFamily: "'JetBrains Mono', monospace",
-              padding: { top: 12 },
-              scrollBeyondLastLine: false,
-              wordWrap: 'on',
-              suggestOnTriggerCharacters: true,
-            }}
-          />
+          <Editor height="100%" language={language === 'cpp' ? 'cpp' : language}
+            theme="vs-dark" value={code} onChange={val => setCode(val || '')}
+            options={{ minimap: { enabled: false }, fontSize: 14, fontFamily: "'JetBrains Mono', monospace",
+              padding: { top: 12 }, scrollBeyondLastLine: false, wordWrap: 'on' }} />
         </div>
 
-        {/* Console / Result Panel */}
+        {/* Console */}
         <div style={{
-          height: result ? 160 : 80,
-          background: '#1a1a1a', borderTop: '1px solid #333',
-          padding: '0.75rem 1rem', display: 'flex', flexDirection: 'column',
-          transition: 'height 0.3s',
+          height: result ? 130 : 50, background: '#1a1a1a',
+          borderTop: '1px solid #333', padding: '8px 14px', transition: 'height 0.2s',
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-            <span style={{ color: '#888', fontWeight: 600, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: 1 }}>Console</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ color: '#666', fontWeight: 600, fontSize: 12, textTransform: 'uppercase', letterSpacing: 1, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Terminal size={12} /> Console
+            </span>
             {result && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                {getVerdictIcon(result.verdict)}
-                <span className={getVerdictClass(result.verdict)} style={{ fontWeight: 700, fontSize: '0.95rem' }}>
-                  {result.verdict.replace('_', ' ')}
-                </span>
-              </div>
+              <span style={{
+                fontWeight: 700, fontSize: 14,
+                color: result.verdict === 'ACCEPTED' ? 'var(--lc-accepted)' : 'var(--lc-wrong)',
+              }}>
+                {result.verdict?.replace('_', ' ')}
+              </span>
             )}
           </div>
-          <div className="code-font" style={{
-            flex: 1, background: '#111', borderRadius: '4px', padding: '0.6rem',
-            color: result?.verdict === 'ACCEPTED' ? '#0f0' : result ? '#f66' : '#666',
-            fontSize: '0.8rem', overflowY: 'auto', lineHeight: 1.6,
-          }}>
-            {submitting ? (
-              <span style={{ color: '#ff0' }}>⏳ Compiling and running test cases...</span>
-            ) : result ? (
-              <>
-                <div>Verdict: <strong>{result.verdict.replace('_', ' ')}</strong></div>
-                <div>Runtime: {result.runtime?.toFixed(2) || '—'} ms</div>
-                <div>Language: {result.language}</div>
-                {result.verdict === 'ACCEPTED' && <div style={{ marginTop: 4, color: '#0f0' }}>✓ All test cases passed!</div>}
-              </>
-            ) : (
-              '> Ready. Write your solution and click Submit.'
-            )}
-          </div>
+          {result && (
+            <div className="code-font" style={{
+              marginTop: 6, padding: 8, background: '#111', borderRadius: 4,
+              color: result.verdict === 'ACCEPTED' ? '#0f0' : '#f66', fontSize: 12, lineHeight: 1.6,
+            }}>
+              <div>Verdict: <strong>{result.verdict?.replace('_', ' ')}</strong></div>
+              <div>Runtime: {result.runtime?.toFixed(1)} ms</div>
+              {result.verdict === 'ACCEPTED' && <div style={{ color: '#0f0', marginTop: 2 }}>All test cases passed!</div>}
+            </div>
+          )}
+          {!result && !submitting && (
+            <div className="code-font" style={{ marginTop: 6, color: '#555', fontSize: 12 }}>
+              {'>'} Ready.
+            </div>
+          )}
+          {submitting && (
+            <div className="code-font" style={{ marginTop: 6, color: '#ff0', fontSize: 12 }}>
+              Judging...
+            </div>
+          )}
         </div>
       </div>
     </div>

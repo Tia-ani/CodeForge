@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Code2, Trophy, List, User as UserIcon, LogOut, History } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { Search, Bell, Flame, LogOut, User, Trophy, BookOpen, Code2 } from 'lucide-react';
 
 const Navbar = () => {
   const location = useLocation();
@@ -8,93 +8,88 @@ const Navbar = () => {
   const { user, logout, isAuthenticated } = useAuth();
   const isActive = (path: string) => location.pathname === path;
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
+  const navLinkStyle = (path: string): React.CSSProperties => ({
+    color: isActive(path) ? '#eff1f6' : '#eff1f6bf',
+    fontWeight: isActive(path) ? 600 : 400,
+    fontSize: '14px',
+    padding: '0 12px',
+    lineHeight: '50px',
+    borderBottom: isActive(path) ? '2px solid var(--lc-brand)' : '2px solid transparent',
+    transition: 'color 0.15s',
+    cursor: 'pointer',
+  });
 
   return (
     <nav style={{
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      padding: '0.9rem 2rem',
-      backgroundColor: 'rgba(2, 6, 23, 0.85)',
-      backdropFilter: 'blur(16px)',
-      borderBottom: '1px solid var(--border)',
-      position: 'sticky',
-      top: 0,
-      zIndex: 50,
+      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      height: 50, padding: '0 16px',
+      background: 'var(--lc-bg-layer1)',
+      borderBottom: '1px solid var(--lc-border)',
+      position: 'sticky', top: 0, zIndex: 100,
     }}>
-      {/* Logo */}
-      <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-        <div style={{
-          background: 'linear-gradient(135deg, var(--accent-primary), var(--accent-purple))',
-          padding: '0.45rem',
-          borderRadius: '8px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: '0 0 12px rgba(59, 130, 246, 0.3)',
-        }}>
-          <Code2 color="white" size={20} />
-        </div>
-        <span style={{ fontSize: '1.15rem', fontWeight: 700, color: 'white', letterSpacing: '-0.02em' }}>
-          CodeForge
-        </span>
-      </Link>
-
-      {/* Center Nav */}
-      <div style={{ display: 'flex', gap: '1.75rem', alignItems: 'center' }}>
-        <Link to="/problems" className={`nav-link ${isActive('/problems') ? 'active' : ''}`}
-          style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
-          <List size={16} /> Problems
+      {/* Left */}
+      <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+        <Link to="/" style={{ display: 'flex', alignItems: 'center', marginRight: 20 }}>
+          <Code2 size={22} color="#ffa116" style={{ marginRight: 6 }} />
+          <span style={{ fontWeight: 700, fontSize: 18, color: '#eff1f6', letterSpacing: '-0.3px' }}>CodeForge</span>
         </Link>
-        <Link to="/leaderboard" className={`nav-link ${isActive('/leaderboard') ? 'active' : ''}`}
-          style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
-          <Trophy size={16} /> Leaderboard
-        </Link>
-        {isAuthenticated && (
-          <Link to="/submissions" className={`nav-link ${isActive('/submissions') ? 'active' : ''}`}
-            style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
-            <History size={16} /> My Submissions
-          </Link>
-        )}
+        <Link to="/" style={navLinkStyle('/')}>Explore</Link>
+        <Link to="/problems" style={navLinkStyle('/problems')}>Problems</Link>
+        <Link to="/leaderboard" style={navLinkStyle('/leaderboard')}>Contest</Link>
+        <Link to="/submissions" style={navLinkStyle('/submissions')}>Submissions</Link>
       </div>
 
-      {/* Right — Auth */}
-      <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+      {/* Right */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        {/* Search */}
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 6,
+          background: 'var(--lc-bg-layer2)', padding: '5px 12px',
+          borderRadius: 'var(--radius)', border: '1px solid var(--lc-border)',
+          minWidth: 160, cursor: 'pointer',
+        }}>
+          <Search size={14} color="#ffffff59" />
+          <span style={{ color: 'var(--lc-text-muted)', fontSize: 13 }}>Search</span>
+        </div>
+
         {isAuthenticated ? (
           <>
-            <div style={{
-              display: 'flex', alignItems: 'center', gap: '0.5rem',
-              background: 'rgba(255,255,255,0.04)', padding: '0.4rem 0.8rem',
-              borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)',
-            }}>
-              <div style={{
-                width: 28, height: 28, borderRadius: '50%',
-                background: 'linear-gradient(135deg, var(--accent-primary), var(--accent-purple))',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '0.75rem', fontWeight: 700, color: 'white',
-              }}>
-                {user?.name?.charAt(0).toUpperCase()}
-              </div>
-              <span style={{ fontSize: '0.85rem', fontWeight: 500 }}>{user?.name}</span>
+            <Bell size={18} color="var(--lc-text-secondary)" style={{ cursor: 'pointer' }} onClick={() => navigate('/submissions')} />
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--lc-text-secondary)', fontSize: 13, cursor: 'pointer' }}
+              onClick={() => navigate('/leaderboard')}>
+              <Flame size={15} /> 0
             </div>
-            <button onClick={handleLogout} className="btn-ghost"
-              style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.85rem' }}>
-              <LogOut size={15} /> Logout
+
+            {/* Avatar */}
+            <div onClick={() => navigate('/profile')} title="Profile" style={{
+              width: 30, height: 30, borderRadius: '50%',
+              background: 'linear-gradient(135deg, var(--lc-brand), #ff6b00)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 13, fontWeight: 700, color: '#1a1a1a', cursor: 'pointer',
+            }}>
+              {user?.name?.charAt(0).toUpperCase()}
+            </div>
+
+            <button onClick={() => { logout(); navigate('/'); }} style={{
+              background: 'none', border: 'none', color: 'var(--lc-text-muted)',
+              cursor: 'pointer', fontSize: 12, fontFamily: 'inherit',
+              display: 'flex', alignItems: 'center', gap: 4,
+            }}>
+              <LogOut size={14} /> Logout
             </button>
           </>
         ) : (
-          <Link to="/auth">
-            <button className="btn-primary" style={{
-              display: 'flex', gap: '0.4rem', alignItems: 'center',
-              padding: '0.5rem 1.1rem', fontSize: '0.85rem'
-            }}>
-              <UserIcon size={15} /> Sign In
-            </button>
-          </Link>
+          <>
+            <Link to="/auth">
+              <button className="lc-btn" style={{ fontSize: 13 }}>Sign in</button>
+            </Link>
+            <Link to="/auth">
+              <button className="lc-btn-primary" style={{ padding: '6px 16px', fontSize: 13 }}>
+                Premium
+              </button>
+            </Link>
+          </>
         )}
       </div>
     </nav>
