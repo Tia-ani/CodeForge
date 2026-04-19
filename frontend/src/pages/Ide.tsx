@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
 import { problemAPI, submissionAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { ArrowLeft, Play, RotateCcw, Terminal, CheckCircle2, XCircle, Clock, AlertTriangle, Eye, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { ArrowLeft, Play, RotateCcw, CheckCircle2, XCircle, Clock, AlertTriangle, Eye, ChevronLeft, ChevronRight, X } from 'lucide-react';
 
 interface ProblemDetail {
   problemId: number; title: string; description: string;

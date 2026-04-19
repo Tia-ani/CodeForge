@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Search, Bell, Flame, LogOut, User, Trophy, BookOpen, Code2 } from 'lucide-react';
+import { Search, Bell, Flame, LogOut, Code2 } from 'lucide-react';
 
 const Navbar = () => {
   const location = useLocation();
