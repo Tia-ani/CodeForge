@@ -1,8 +1,8 @@
-# CodeForge 🔥
+# CodeForge
 
 A modern online coding platform inspired by LeetCode, built with React, Node.js, and SQLite. Features real-time code execution, visual debugging with Forge-Sight, and a beautiful High-Contrast Mocha & Clay theme.
 
-## ✨ Features
+## Features
 
 ### Core Functionality
 - **120+ Coding Problems** - Easy, Medium, and Hard difficulty levels
@@ -13,12 +13,12 @@ A modern online coding platform inspired by LeetCode, built with React, Node.js,
 - **Leaderboard** - Compete with other users based on solved problems
 
 ### Unique Features
-- **🔍 Forge-Sight Visual Execution Tracer** - Step-by-step debugging with variable inspection
-- **📚 Study Plans** - Organized learning tracks (Beginner, Data Structures, Algorithms, Interview Prep)
-- **⭐ Favorites** - Save and organize problems for later practice
-- **🎨 High-Contrast Theme** - Accessible design with 7:1 contrast ratio (WCAG AAA)
+- **Forge-Sight Visual Execution Tracer** - Step-by-step debugging with variable inspection
+- **Study Plans** - Organized learning tracks (Beginner, Data Structures, Algorithms, Interview Prep)
+- **Favorites** - Save and organize problems for later practice
+- **High-Contrast Theme** - Accessible design with 7:1 contrast ratio (WCAG AAA)
 
-## 🚀 Tech Stack
+## Tech Stack
 
 ### Frontend
 - **React 18** with TypeScript
@@ -40,7 +40,7 @@ A modern online coding platform inspired by LeetCode, built with React, Node.js,
 - **Observer Pattern** - Leaderboard updates
 - **DTO Pattern** - Standardized API responses
 
-## 📦 Installation
+## Installation
 
 ### Prerequisites
 - Node.js 18+ and npm
@@ -68,7 +68,7 @@ npm run dev
 
 The frontend will start on `http://localhost:5173`
 
-## 🔑 Default Credentials
+## Default Credentials
 
 **User Account:**
 - Email: `anishka@codeforge.com`
@@ -78,7 +78,7 @@ The frontend will start on `http://localhost:5173`
 - Email: `admin@codeforge.com`
 - Password: `admin123`
 
-## 🗄️ Database
+## Database
 
 The project uses SQLite for easy setup. The database file is created automatically at `backend/codeforge.sqlite`.
 
@@ -94,7 +94,7 @@ npm run dev
 
 This will delete the database and reseed it with fresh data.
 
-## 🎯 Key Features Explained
+## Key Features Explained
 
 ### Forge-Sight Visual Execution Tracer
 
@@ -120,7 +120,7 @@ Before submitting, test your code with custom inputs:
 3. Click **Run** to see the output
 4. Verify correctness before submitting
 
-## 🎨 Theme
+## Theme
 
 CodeForge uses a custom **High-Contrast Mocha & Clay** theme:
 - **Background**: Deep Mocha (#0D0D0D)
@@ -128,7 +128,7 @@ CodeForge uses a custom **High-Contrast Mocha & Clay** theme:
 - **Accent**: Clay (#3D1F16)
 - **Contrast Ratio**: 7:1+ (WCAG AAA compliant)
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 CodeForge/
@@ -155,7 +155,7 @@ CodeForge/
 └── README.md
 ```
 
-## 🔧 API Endpoints
+## API Endpoints
 
 ### Authentication
 - `POST /api/auth/register` - Register new user
@@ -178,7 +178,7 @@ CodeForge/
 ### Profile
 - `GET /api/profile` - Get user profile
 
-## 🧪 Testing
+## Testing
 
 ### Test a Submission
 
@@ -201,21 +201,11 @@ CodeForge/
 3. Use Previous/Next to step through execution
 4. Watch variables change in the inspector
 
-## 🤝 Contributing
 
-This is an academic project. Contributions are welcome!
+## Authors
 
-## 📄 License
+- **Anishka Khurana** 
 
-This project is for educational purposes.
-
-## 👥 Authors
-
-- **Anishka Khurana** - Initial work
-
-## 🙏 Acknowledgments
-
-- Inspired by LeetCode and HackerRank
 - Built as a university project demonstrating software design patterns
 - Uses Monaco Editor (VS Code's editor)
 
