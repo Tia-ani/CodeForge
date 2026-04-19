@@ -2,14 +2,11 @@
 
 A modern online coding platform inspired by LeetCode, built with React, Node.js, and PostgreSQL. Features real-time code execution, visual debugging with Forge-Sight, and a beautiful High-Contrast Mocha & Clay theme.
 
-## 🚀 Live Demo
+## Live Demo
 
 - **Frontend**: [https://code-forge-szmr.vercel.app](https://code-forge-szmr.vercel.app)
 - **Backend API**: [https://codeforge-68pw.onrender.com](https://codeforge-68pw.onrender.com)
 
-**Try it now with demo credentials:**
-- Email: `anishka@codeforge.com`
-- Password: `user123`
 
 ## Features
 
