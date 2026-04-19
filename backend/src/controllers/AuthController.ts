@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { AuthService } from '../services/AuthService';
+import { successResponse, errorResponse } from '../dtos/ApiResponse';
 
 const authService = new AuthService();
 
@@ -8,9 +9,9 @@ export class AuthController {
     try {
       const { name, email, password } = req.body;
       const result = await authService.register(name, email, password);
-      res.json(result);
+      res.json(successResponse(result));
     } catch (error: any) {
-      res.status(400).json({ error: error.message });
+      res.status(400).json(errorResponse(error.message));
     }
   }
 
@@ -18,9 +19,9 @@ export class AuthController {
     try {
       const { email, password } = req.body;
       const result = await authService.login(email, password);
-      res.json(result);
+      res.json(successResponse(result));
     } catch (error: any) {
-      res.status(400).json({ error: error.message });
+      res.status(400).json(errorResponse(error.message));
     }
   }
 }

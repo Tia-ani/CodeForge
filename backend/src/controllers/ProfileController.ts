@@ -2,6 +2,7 @@ import { Response } from 'express';
 import { AuthRequest } from '../middlewares/auth';
 import { Submission, Problem, User, Leaderboard, TestCase } from '../models';
 import { Op } from 'sequelize';
+import { successResponse, errorResponse } from '../dtos/ApiResponse';
 
 export class ProfileController {
   /**
@@ -12,7 +13,7 @@ export class ProfileController {
       const userId = req.user.userId;
 
       const user = await User.findByPk(userId);
-      if (!user) return res.status(404).json({ error: 'User not found' });
+      if (!user) return res.status(404).json(errorResponse('User not found'));
 
       // Get leaderboard entry
       const lb = await Leaderboard.findOne({ where: { userId } });
@@ -92,7 +93,7 @@ export class ProfileController {
         }
       }
 
-      res.json({
+      res.json(successResponse({
         userId: user.userId,
         name: user.name,
         email: user.email,
@@ -108,9 +109,9 @@ export class ProfileController {
         heatmapData,
         recentAccepted,
         languages: Object.entries(languageCounts).map(([lang, count]) => ({ language: lang, count })),
-      });
+      }));
     } catch (error: any) {
-      res.status(500).json({ error: error.message });
+      res.status(500).json(errorResponse(error.message));
     }
   }
 }
