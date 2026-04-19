@@ -1,16 +1,21 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { problemAPI } from '../services/api';
-import { Search, ArrowUpDown, Filter, BookOpen, Swords, GraduationCap, Lock, Unlock, Grid3X3, Settings, DollarSign, Shuffle, FileCode, FolderOpen, Star, ChevronLeft, ChevronRight, Building } from 'lucide-react';
+import { Search, ArrowUpDown, Filter, BookOpen, GraduationCap, Unlock, Grid3X3, Settings, DollarSign, Shuffle, FileCode, Star, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface Problem {
   problemId: number;
   title: string;
   difficulty: string;
+  tag: string;
   testCaseCount: number;
 }
 
-const TOPIC_TAGS = ['Array', 'String', 'Hash Table', 'Math', 'Dynamic Programming', 'Sorting', 'Greedy', 'Binary Search', 'Tree', 'Stack'];
+interface TagCount {
+  tag: string;
+  count: number;
+}
+
 const CATEGORY_ICONS = [
   { label: 'All Topics', icon: Grid3X3 },
   { label: 'Algorithms', icon: Settings },
@@ -21,21 +26,31 @@ const CATEGORY_ICONS = [
 ];
 
 const ProblemList = () => {
+  const navigate = useNavigate();
   const [problems, setProblems] = useState<Problem[]>([]);
+  const [tagCounts, setTagCounts] = useState<TagCount[]>([]);
   const [search, setSearch] = useState('');
   const [diffFilter, setDiffFilter] = useState<string>('');
+  const [tagFilter, setTagFilter] = useState<string>('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Fetch problems from database
     problemAPI.getAll()
       .then(res => { setProblems(res.data); setLoading(false); })
       .catch(() => setLoading(false));
+
+    // Fetch dynamic tag counts (SQL COUNT)
+    problemAPI.getTagCounts()
+      .then(res => setTagCounts(res.data))
+      .catch(() => {});
   }, []);
 
   const filtered = problems.filter(p => {
     const matchSearch = p.title.toLowerCase().includes(search.toLowerCase());
     const matchDiff = !diffFilter || p.difficulty === diffFilter;
-    return matchSearch && matchDiff;
+    const matchTag = !tagFilter || p.tag === tagFilter;
+    return matchSearch && matchDiff && matchTag;
   });
 
   const getDiffClass = (d: string) => d === 'EASY' ? 'diff-easy' : d === 'MEDIUM' ? 'diff-medium' : 'diff-hard';
@@ -50,44 +65,62 @@ const ProblemList = () => {
       {/* Left Sidebar */}
       <div style={{ width: 160, flexShrink: 0 }}>
         {[
-          { icon: BookOpen, label: 'Library', active: true },
-          { icon: Swords, label: 'Quest', badge: 'New' },
-          { icon: GraduationCap, label: 'Study Plan' },
+          { icon: BookOpen, label: 'Library', active: true, path: '/problems' },
+          { icon: GraduationCap, label: 'Study Plan', active: false, path: '/study-plan' },
         ].map((item, i) => (
-          <div key={i} style={{
+          <div key={i} 
+            onClick={() => navigate(item.path)}
+            style={{
             display: 'flex', alignItems: 'center', gap: 8,
             padding: '10px 14px', borderRadius: 'var(--radius)',
-            color: item.active ? 'var(--lc-text)' : 'var(--lc-text-secondary)',
+            color: item.active ? 'var(--lc-brand)' : 'var(--lc-text-secondary)',
             background: item.active ? 'var(--lc-bg-layer2)' : 'transparent',
-            cursor: 'pointer', marginBottom: 2, fontSize: 14, fontWeight: 500,
+            cursor: 'pointer', marginBottom: 2, fontSize: 14, fontWeight: item.active ? 600 : 500,
+            border: item.active ? '1px solid var(--lc-brand-dim)' : '1px solid transparent',
+            transition: 'all 0.15s',
           }}>
-            <item.icon size={16} /> {item.label}
-            {item.badge && <span style={{
-              background: 'var(--lc-brand)', color: '#1a1a1a',
-              fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 10,
-            }}>{item.badge}</span>}
+            <item.icon size={16} strokeWidth={1.5} /> {item.label}
           </div>
         ))}
 
         <div style={{ borderTop: '1px solid var(--lc-border)', margin: '16px 0' }} />
         <div style={{ padding: '0 14px', color: 'var(--lc-text-muted)', fontSize: 12, fontWeight: 500, marginBottom: 8 }}>My Lists +</div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px', fontSize: 14, color: 'var(--lc-text-secondary)', cursor: 'pointer' }}>
-          <Star size={14} color="var(--lc-brand)" /> Favorite
+        <div 
+          onClick={() => navigate('/favorites')}
+          style={{ 
+            display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px', fontSize: 14, 
+            color: 'var(--lc-text-secondary)', cursor: 'pointer', borderRadius: 'var(--radius)',
+            transition: 'all 0.15s',
+          }}
+          onMouseEnter={e => {
+            e.currentTarget.style.background = 'var(--lc-bg-layer2)';
+            e.currentTarget.style.color = 'var(--lc-brand)';
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.background = 'transparent';
+            e.currentTarget.style.color = 'var(--lc-text-secondary)';
+          }}>
+          <Star size={14} color="var(--lc-brand)" strokeWidth={1.5} /> Favorite
         </div>
       </div>
 
       {/* Main Content */}
       <div style={{ flex: 1 }}>
 
-        {/* Topic tags */}
+        {/* Dynamic topic tags — fetched from SQL COUNT(*) */}
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
-          {TOPIC_TAGS.map((tag, i) => (
-            <span key={i} style={{
-              padding: '4px 12px', borderRadius: 20, fontSize: 12,
-              background: 'var(--lc-bg-layer2)', color: 'var(--lc-text-secondary)',
-              cursor: 'pointer',
-            }}>
-              {tag} <span style={{ color: 'var(--lc-text-muted)' }}>{((i * 317 + 100) % 2000) + 100}</span>
+          {tagCounts.map((tc, i) => (
+            <span key={i}
+              onClick={() => setTagFilter(tagFilter === tc.tag ? '' : tc.tag)}
+              style={{
+                padding: '6px 14px', borderRadius: 20, fontSize: 12,
+                background: tagFilter === tc.tag ? 'var(--lc-brand)' : 'var(--lc-bg-layer2)',
+                color: tagFilter === tc.tag ? 'white' : 'var(--lc-text-secondary)',
+                cursor: 'pointer', fontWeight: tagFilter === tc.tag ? 600 : 500,
+                transition: 'all 0.15s',
+                border: tagFilter === tc.tag ? 'none' : '1px solid var(--lc-border)',
+              }}>
+              {tc.tag} <span style={{ color: tagFilter === tc.tag ? 'rgba(255,255,255,0.7)' : 'var(--lc-text-muted)', fontWeight: 700 }}>{tc.count}</span>
             </span>
           ))}
         </div>
@@ -139,12 +172,12 @@ const ProblemList = () => {
           </button>
           <div style={{ flex: 1 }} />
           <span style={{ color: 'var(--lc-text-muted)', fontSize: 13 }}>
-            {filtered.length}/{problems.length} Solved
+            {filtered.length}/{problems.length} Problems
           </span>
         </div>
 
         {/* Problem table */}
-        <div style={{ background: 'var(--lc-bg-layer1)', borderRadius: 'var(--radius)', overflow: 'hidden' }}>
+        <div style={{ background: 'var(--lc-bg-layer1)', borderRadius: 'var(--radius-lg)', overflow: 'hidden', border: '1px solid var(--lc-border)' }}>
           {loading ? (
             <div style={{ padding: 40, textAlign: 'center', color: 'var(--lc-text-muted)' }}>
               <span className="spinner" style={{ marginRight: 8 }} /> Loading problems...
@@ -157,13 +190,21 @@ const ProblemList = () => {
             <Link to={`/problem/${p.problemId}`} key={p.problemId}
               style={{ display: 'block', textDecoration: 'none' }}>
               <div style={{
-                display: 'flex', alignItems: 'center', padding: '11px 16px',
+                display: 'flex', alignItems: 'center', padding: '12px 18px',
                 background: idx % 2 === 0 ? 'var(--lc-bg-layer1)' : 'var(--lc-bg)',
-                borderBottom: '1px solid var(--lc-border)',
-                transition: 'background 0.1s', cursor: 'pointer',
+                borderBottom: idx === filtered.length - 1 ? 'none' : '1px solid var(--lc-border)',
+                transition: 'all 0.15s', cursor: 'pointer',
               }}
-              onMouseEnter={e => (e.currentTarget.style.background = 'var(--lc-bg-hover)')}
-              onMouseLeave={e => (e.currentTarget.style.background = idx % 2 === 0 ? 'var(--lc-bg-layer1)' : 'var(--lc-bg)')}>
+              onMouseEnter={e => {
+                e.currentTarget.style.background = 'var(--lc-bg-layer2)';
+                e.currentTarget.style.borderLeft = '3px solid var(--lc-brand)';
+                e.currentTarget.style.paddingLeft = '15px';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = idx % 2 === 0 ? 'var(--lc-bg-layer1)' : 'var(--lc-bg)';
+                e.currentTarget.style.borderLeft = 'none';
+                e.currentTarget.style.paddingLeft = '18px';
+              }}>
 
                 <div style={{ width: 30, flexShrink: 0, color: 'var(--lc-text-muted)' }}>
                   <span style={{ fontSize: 12 }}>—</span>
@@ -173,18 +214,28 @@ const ProblemList = () => {
                   {p.problemId}. {p.title}
                 </div>
 
+                <div style={{ width: 100, textAlign: 'center' }}>
+                  <span style={{
+                    padding: '3px 10px', borderRadius: 10, fontSize: 11,
+                    background: 'var(--lc-bg-layer2)', color: 'var(--lc-text-muted)',
+                    border: '1px solid var(--lc-border)',
+                  }}>
+                    {p.tag}
+                  </span>
+                </div>
+
                 <div style={{ width: 70, textAlign: 'right', color: 'var(--lc-text-muted)', fontSize: 13 }}>
                   {getAcceptance(p.problemId)}%
                 </div>
 
                 <div style={{ width: 60, textAlign: 'right' }}>
-                  <span className={getDiffClass(p.difficulty)} style={{ fontSize: 13, fontWeight: 500 }}>
+                  <span className={getDiffClass(p.difficulty)} style={{ fontSize: 13, fontWeight: 600 }}>
                     {getDiffLabel(p.difficulty)}
                   </span>
                 </div>
 
                 <div style={{ width: 40, textAlign: 'right', color: 'var(--lc-text-muted)' }}>
-                  <Unlock size={14} />
+                  <Unlock size={14} strokeWidth={1.5} />
                 </div>
               </div>
             </Link>
@@ -195,7 +246,7 @@ const ProblemList = () => {
       {/* Right Sidebar */}
       <div style={{ width: 260, flexShrink: 0 }}>
         {/* Calendar */}
-        <div style={{ background: 'var(--lc-bg-layer1)', borderRadius: 'var(--radius)', padding: 16, marginBottom: 16 }}>
+        <div style={{ background: 'var(--lc-bg-layer1)', borderRadius: 'var(--radius-lg)', padding: 16, marginBottom: 16, border: '1px solid var(--lc-border)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
             <span style={{ fontSize: 14, fontWeight: 600 }}>
               Day {new Date().getDate()} <span style={{ color: 'var(--lc-text-muted)', fontSize: 11 }}>
@@ -203,8 +254,8 @@ const ProblemList = () => {
               </span>
             </span>
             <div style={{ display: 'flex', gap: 4 }}>
-              <ChevronLeft size={14} color="var(--lc-text-muted)" style={{ cursor: 'pointer' }} />
-              <ChevronRight size={14} color="var(--lc-text-muted)" style={{ cursor: 'pointer' }} />
+              <ChevronLeft size={14} color="var(--lc-text-muted)" strokeWidth={1.5} style={{ cursor: 'pointer' }} />
+              <ChevronRight size={14} color="var(--lc-text-muted)" strokeWidth={1.5} style={{ cursor: 'pointer' }} />
             </div>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2, textAlign: 'center' }}>
@@ -217,7 +268,7 @@ const ProblemList = () => {
               return (
                 <div key={i} style={{
                   fontSize: 12, padding: 4, borderRadius: 4,
-                  color: day === today ? '#1a1a1a' : day > 0 && day <= 30 ? 'var(--lc-text-secondary)' : 'var(--lc-text-muted)',
+                  color: day === today ? 'white' : day > 0 && day <= 30 ? 'var(--lc-text-secondary)' : 'var(--lc-text-muted)',
                   background: day === today ? 'var(--lc-brand)' : 'transparent',
                   fontWeight: day === today ? 700 : 400,
                 }}>

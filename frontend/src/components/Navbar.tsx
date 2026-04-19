@@ -9,14 +9,15 @@ const Navbar = () => {
   const isActive = (path: string) => location.pathname === path;
 
   const navLinkStyle = (path: string): React.CSSProperties => ({
-    color: isActive(path) ? '#eff1f6' : '#eff1f6bf',
+    color: isActive(path) ? 'var(--lc-brand)' : 'var(--lc-text-secondary)',
     fontWeight: isActive(path) ? 600 : 400,
     fontSize: '14px',
     padding: '0 12px',
     lineHeight: '50px',
     borderBottom: isActive(path) ? '2px solid var(--lc-brand)' : '2px solid transparent',
-    transition: 'color 0.15s',
+    transition: 'all 0.15s',
     cursor: 'pointer',
+    position: 'relative',
   });
 
   return (
@@ -30,12 +31,12 @@ const Navbar = () => {
       {/* Left */}
       <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
         <Link to="/" style={{ display: 'flex', alignItems: 'center', marginRight: 20 }}>
-          <Code2 size={22} color="#ffa116" style={{ marginRight: 6 }} />
-          <span style={{ fontWeight: 700, fontSize: 18, color: '#eff1f6', letterSpacing: '-0.3px' }}>CodeForge</span>
+          <Code2 size={22} color="var(--lc-brand)" strokeWidth={1.5} style={{ marginRight: 6 }} />
+          <span style={{ fontWeight: 700, fontSize: 18, color: 'var(--lc-text)', letterSpacing: '-0.3px' }}>CodeForge</span>
         </Link>
         <Link to="/" style={navLinkStyle('/')}>Explore</Link>
         <Link to="/problems" style={navLinkStyle('/problems')}>Problems</Link>
-        <Link to="/leaderboard" style={navLinkStyle('/leaderboard')}>Contest</Link>
+        <Link to="/leaderboard" style={navLinkStyle('/leaderboard')}>Leaderboard</Link>
         <Link to="/submissions" style={navLinkStyle('/submissions')}>Submissions</Link>
       </div>
 
@@ -54,19 +55,20 @@ const Navbar = () => {
 
         {isAuthenticated ? (
           <>
-            <Bell size={18} color="var(--lc-text-secondary)" style={{ cursor: 'pointer' }} onClick={() => navigate('/submissions')} />
+            <Bell size={18} color="var(--lc-text-secondary)" strokeWidth={1.5} style={{ cursor: 'pointer' }} onClick={() => navigate('/submissions')} />
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--lc-text-secondary)', fontSize: 13, cursor: 'pointer' }}
               onClick={() => navigate('/leaderboard')}>
-              <Flame size={15} /> 0
+              <Flame size={15} strokeWidth={1.5} /> 0
             </div>
 
             {/* Avatar */}
             <div onClick={() => navigate('/profile')} title="Profile" style={{
               width: 30, height: 30, borderRadius: '50%',
-              background: 'linear-gradient(135deg, var(--lc-brand), #ff6b00)',
+              background: 'var(--lc-brand)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 13, fontWeight: 700, color: '#1a1a1a', cursor: 'pointer',
+              fontSize: 13, fontWeight: 700, color: 'white', cursor: 'pointer',
+              border: '2px solid var(--lc-brand-dim)',
             }}>
               {user?.name?.charAt(0).toUpperCase()}
             </div>
@@ -76,7 +78,7 @@ const Navbar = () => {
               cursor: 'pointer', fontSize: 12, fontFamily: 'inherit',
               display: 'flex', alignItems: 'center', gap: 4,
             }}>
-              <LogOut size={14} /> Logout
+              <LogOut size={14} strokeWidth={1.5} /> Logout
             </button>
           </>
         ) : (

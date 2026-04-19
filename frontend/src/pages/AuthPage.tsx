@@ -50,8 +50,8 @@ const AuthPage = () => {
 
         {isLogin && (
           <div style={{
-            background: 'var(--lc-brand-dim)', border: '1px solid #ffa11644',
-            borderRadius: 'var(--radius)', padding: '10px 14px', marginBottom: 16,
+            background: 'var(--lc-brand-dim)', border: '1px solid var(--lc-brand-dim)',
+            borderRadius: 'var(--radius-lg)', padding: '12px 16px', marginBottom: 16,
             fontSize: 12, color: 'var(--lc-brand)',
           }}>
             <strong>Demo:</strong> anishka@codeforge.com / user123
