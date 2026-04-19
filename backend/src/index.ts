@@ -19,7 +19,10 @@ app.use('/api', routes);
 
 async function seedData() {
   const count = await Problem.count();
-  if (count > 0) return;
+  if (count > 0) {
+    console.log("[DataSeeder] Database already seeded, skipping...");
+    return;
+  }
 
   console.log("[DataSeeder] Initializing database...");
 
@@ -27,16 +30,19 @@ async function seedData() {
   const hashedPassword = await bcrypt.hash('user123', 10);
   const user = await User.create({ name: 'Anishka Khurana', email: 'anishka@codeforge.com', password: hashedPassword, role: 'USER' });
   await Leaderboard.create({ userId: user.userId, totalScore: 0, problemsSolved: 0 });
+  console.log("[DataSeeder] Created user: anishka@codeforge.com");
 
   const adminPassword = await bcrypt.hash('admin123', 10);
   const admin = await User.create({ name: 'Admin', email: 'admin@codeforge.com', password: adminPassword, role: 'ADMIN' });
   await Leaderboard.create({ userId: admin.userId, totalScore: 0, problemsSolved: 0 });
+  console.log("[DataSeeder] Created admin: admin@codeforge.com");
 
   // Seed 120 problems
   await seedProblems();
+  console.log("[DataSeeder] ✅ Database seeding complete!");
 }
 
-sequelize.sync({ force: true }).then(async () => {
+sequelize.sync({ force: false, alter: true }).then(async () => {
   console.log('[DB] Database synced');
   await seedData();
   app.listen(PORT, () => {
