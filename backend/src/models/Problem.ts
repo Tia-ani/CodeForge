@@ -5,6 +5,7 @@ export class Problem extends Model {
   declare title: string;
   declare description: string;
   declare difficulty: string;
+  declare tag: string;
   declare constraints: string;
 }
 
@@ -26,6 +27,11 @@ Problem.init(
     difficulty: {
       type: DataTypes.STRING,
       allowNull: false,
+    },
+    tag: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: 'Array',
     },
     constraints: {
       type: DataTypes.TEXT,
