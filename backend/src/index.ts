@@ -11,12 +11,10 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 
 // CORS configuration for production
-const allowedOrigins = [
+const allowedOrigins: (string | RegExp)[] = [
   'http://localhost:5173',
   'http://localhost:5174',
   'http://localhost:3000',
-  // Add your Vercel domain after deployment
-  // 'https://your-app.vercel.app'
 ];
 
 // In production, allow any Vercel domain
@@ -25,14 +23,16 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 app.use(cors({
-  origin: function (origin, callback) {
+  origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
     // Allow requests with no origin (like mobile apps or curl)
     if (!origin) return callback(null, true);
     
-    if (allowedOrigins.some(allowed => {
+    const isAllowed = allowedOrigins.some(allowed => {
       if (allowed instanceof RegExp) return allowed.test(origin);
       return allowed === origin;
-    })) {
+    });
+    
+    if (isAllowed) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
