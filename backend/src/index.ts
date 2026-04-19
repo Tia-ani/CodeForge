@@ -10,8 +10,34 @@ import bcrypt from 'bcryptjs';
 const app = express();
 const PORT = process.env.PORT || 8080;
 
+// CORS configuration for production
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'http://localhost:3000',
+  // Add your Vercel domain after deployment
+  // 'https://your-app.vercel.app'
+];
+
+// In production, allow any Vercel domain
+if (process.env.NODE_ENV === 'production') {
+  allowedOrigins.push(/\.vercel\.app$/);
+}
+
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:3000'],
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.some(allowed => {
+      if (allowed instanceof RegExp) return allowed.test(origin);
+      return allowed === origin;
+    })) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
 app.use(express.json());
