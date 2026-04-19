@@ -210,5 +210,3 @@ CodeForge/
 - Uses Monaco Editor (VS Code's editor)
 
 ---
-
-**Happy Coding!** 🚀
