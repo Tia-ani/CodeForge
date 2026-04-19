@@ -13,11 +13,14 @@ router.post('/auth/register', AuthController.register);
 router.post('/auth/login', AuthController.login);
 
 // Problems
+router.get('/problems/tags', ProblemController.getTagCounts);   // must be before :id
 router.get('/problems', ProblemController.getAll);
 router.get('/problems/:id', ProblemController.getById);
 
-// Submissions
+// Submissions (acts as POST /submit endpoint)
+router.post('/submissions/run', authenticateJWT, SubmissionController.runCode);
 router.post('/submissions', authenticateJWT, SubmissionController.submit);
+router.get('/submissions/:id/trace', authenticateJWT, SubmissionController.getTrace);
 router.get('/submissions', authenticateJWT, SubmissionController.getMySubmissions);
 router.get('/submissions/problem/:problemId', authenticateJWT, SubmissionController.getForProblem);
 
