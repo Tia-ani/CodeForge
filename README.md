@@ -1,6 +1,15 @@
 # CodeForge
 
-A modern online coding platform inspired by LeetCode, built with React, Node.js, and SQLite. Features real-time code execution, visual debugging with Forge-Sight, and a beautiful High-Contrast Mocha & Clay theme.
+A modern online coding platform inspired by LeetCode, built with React, Node.js, and PostgreSQL. Features real-time code execution, visual debugging with Forge-Sight, and a beautiful High-Contrast Mocha & Clay theme.
+
+## 🚀 Live Demo
+
+- **Frontend**: [https://code-forge-szmr.vercel.app](https://code-forge-szmr.vercel.app)
+- **Backend API**: [https://codeforge-68pw.onrender.com](https://codeforge-68pw.onrender.com)
+
+**Try it now with demo credentials:**
+- Email: `anishka@codeforge.com`
+- Password: `user123`
 
 ## Features
 
@@ -30,9 +39,14 @@ A modern online coding platform inspired by LeetCode, built with React, Node.js,
 ### Backend
 - **Node.js** with Express
 - **TypeScript** for type safety
-- **Sequelize ORM** with SQLite
+- **Sequelize ORM** with PostgreSQL (Production) / SQLite (Development)
 - **JWT** for authentication
 - **bcryptjs** for password hashing
+
+### Deployment
+- **Frontend**: Vercel
+- **Backend**: Render
+- **Database**: PostgreSQL (Render)
 
 ### Architecture Patterns
 - **Strategy Pattern** - Judge Engine for multi-language execution
@@ -42,7 +56,13 @@ A modern online coding platform inspired by LeetCode, built with React, Node.js,
 
 ## Installation
 
-### Prerequisites
+### Quick Start (Use Live Demo)
+
+Visit [https://code-forge-szmr.vercel.app](https://code-forge-szmr.vercel.app) and start coding immediately!
+
+### Local Development
+
+#### Prerequisites
 - Node.js 18+ and npm
 - Python 3.x (for code execution)
 - Java JDK 11+ (for Java execution)
@@ -80,7 +100,11 @@ The frontend will start on `http://localhost:5173`
 
 ## Database
 
-The project uses SQLite for easy setup. The database file is created automatically at `backend/codeforge.sqlite`.
+### Production
+The live application uses **PostgreSQL** hosted on Render for reliable, scalable data storage.
+
+### Development
+For local development, the project uses **SQLite** for easy setup. The database file is created automatically at `backend/codeforge.sqlite`.
 
 ### Reset Database
 
@@ -204,9 +228,21 @@ CodeForge/
 
 ## Authors
 
-- **Anishka Khurana** 
+- **Anishka Khurana** - [GitHub](https://github.com/Tia-ani)
+
+## Deployment
+
+This project is deployed using:
+- **Frontend**: Vercel (Automatic deployments from GitHub)
+- **Backend**: Render (Node.js web service)
+- **Database**: PostgreSQL on Render
+
+For deployment instructions, see [DEPLOYMENT_STEPS.md](DEPLOYMENT_STEPS.md)
+
+## Acknowledgments
 
 - Built as a university project demonstrating software design patterns
 - Uses Monaco Editor (VS Code's editor)
+- Inspired by LeetCode's interface and functionality
 
 ---
