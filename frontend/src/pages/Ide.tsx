@@ -269,6 +269,74 @@ const Ide = () => {
                 </div>
               ))}
 
+              {/* Test Cases Section */}
+              {problem.examples && problem.examples.length > 0 && (
+                <div style={{ marginTop: 24, marginBottom: 16 }}>
+                  <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 12, color: 'var(--lc-text)' }}>
+                    Test Cases
+                  </div>
+                  <div style={{ 
+                    background: 'var(--lc-bg-layer1)', 
+                    borderRadius: 'var(--radius-lg)', 
+                    border: '1px solid var(--lc-border)',
+                    overflow: 'hidden',
+                  }}>
+                    {problem.examples.map((ex, i) => (
+                      <div key={i} style={{
+                        padding: '14px 16px',
+                        borderBottom: i < problem.examples.length - 1 ? '1px solid var(--lc-border)' : 'none',
+                      }}>
+                        <div style={{ 
+                          fontSize: 12, 
+                          fontWeight: 600, 
+                          color: 'var(--lc-brand)', 
+                          marginBottom: 8,
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.5px',
+                        }}>
+                          Test Case {i + 1}
+                        </div>
+                        <div style={{ marginBottom: 8 }}>
+                          <div style={{ fontSize: 11, color: 'var(--lc-text-muted)', marginBottom: 4, fontWeight: 600 }}>
+                            INPUT:
+                          </div>
+                          <div className="code-font" style={{
+                            background: 'var(--lc-bg)', 
+                            padding: '8px 10px', 
+                            borderRadius: 'var(--radius-sm)',
+                            fontSize: 12, 
+                            lineHeight: 1.6,
+                            color: 'var(--lc-text-secondary)',
+                            whiteSpace: 'pre-wrap',
+                            border: '1px solid var(--lc-border)',
+                          }}>
+                            {ex.input}
+                          </div>
+                        </div>
+                        <div>
+                          <div style={{ fontSize: 11, color: 'var(--lc-text-muted)', marginBottom: 4, fontWeight: 600 }}>
+                            EXPECTED OUTPUT:
+                          </div>
+                          <div className="code-font" style={{
+                            background: 'var(--lc-bg)', 
+                            padding: '8px 10px', 
+                            borderRadius: 'var(--radius-sm)',
+                            fontSize: 12, 
+                            lineHeight: 1.6,
+                            color: 'var(--lc-accepted)',
+                            whiteSpace: 'pre-wrap',
+                            border: '1px solid var(--lc-border)',
+                            fontWeight: 600,
+                          }}>
+                            {ex.expectedOutput}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {problem.constraints && (
                 <div style={{ marginTop: 12 }}>
                   <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 8 }}>Constraints:</div>
