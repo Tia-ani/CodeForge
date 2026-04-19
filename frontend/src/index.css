@@ -1,29 +1,48 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
 
 :root {
-  /* LeetCode exact dark palette */
-  --lc-bg: #1a1a1a;
-  --lc-bg-layer1: #282828;
-  --lc-bg-layer2: #333333;
-  --lc-bg-layer3: #3e3e3e;
-  --lc-bg-hover: #ffffff0a;
-  --lc-border: #ffffff14;
-  --lc-text: #eff1f6;
-  --lc-text-secondary: #eff1f6bf;
-  --lc-text-muted: #ffffff59;
-  --lc-brand: #ffa116;
-  --lc-brand-dim: #ffa11633;
-  --lc-easy: #00b8a3;
-  --lc-easy-bg: #00b8a31a;
-  --lc-medium: #ffc01e;
-  --lc-medium-bg: #ffc01e1a;
-  --lc-hard: #ff375f;
-  --lc-hard-bg: #ff375f1a;
-  --lc-accepted: #2cbb5d;
-  --lc-wrong: #ef4743;
-  --lc-link: #0a84ff;
-  --lc-purple: #a855f7;
-  --radius: 8px;
+  /* High-Contrast Mocha & Clay Theme */
+  --lc-bg: #0D0D0D;                    /* Deep mocha - main background */
+  --lc-bg-layer1: #1A1A1A;             /* Secondary containers (sidebar, cards) */
+  --lc-bg-layer2: #252525;             /* Tertiary layer */
+  --lc-bg-layer3: #303030;             /* Hover states */
+  --lc-bg-hero: #3D1F16;               /* Hero/banner background (clay) */
+  --lc-bg-hover: #ffffff0f;            /* Hover overlay */
+  --lc-border: #333333;                /* Borders */
+  --lc-border-light: #404040;          /* Lighter borders */
+  
+  /* Text Colors - High Contrast (7:1 ratio) */
+  --lc-text: #FFFFFF;                  /* Primary text - pure white */
+  --lc-text-secondary: #E0E0E0;        /* Secondary text */
+  --lc-text-muted: #999999;            /* Muted text */
+  
+  /* Brand & Action Colors */
+  --lc-brand: #FF5722;                 /* Burnt Orange - primary actions */
+  --lc-brand-hover: #E64A19;           /* Darker orange for hover */
+  --lc-brand-dim: #FF572233;           /* Transparent orange */
+  
+  /* Status Colors */
+  --lc-easy: #4CAF50;                  /* Green */
+  --lc-easy-bg: #4CAF5020;
+  --lc-medium: #FF9800;                /* Amber */
+  --lc-medium-bg: #FF980020;
+  --lc-hard: #F44336;                  /* Red */
+  --lc-hard-bg: #F4433620;
+  --lc-accepted: #4CAF50;              /* Green */
+  --lc-wrong: #F44336;                 /* Red */
+  
+  /* High-Contrast Card */
+  --lc-card-white: #FFFFFF;            /* White cards for important content */
+  --lc-card-text: #0D0D0D;             /* Black text on white cards */
+  
+  /* Other */
+  --lc-link: #FF5722;                  /* Links use brand color */
+  --lc-purple: #BA68C8;                /* Purple accent */
+  
+  /* Border Radius */
+  --radius: 12px;
+  --radius-lg: 16px;
+  --radius-sm: 8px;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -102,15 +121,18 @@ a { text-decoration: none; color: inherit; }
   border-radius: var(--radius); font-size: 13px; font-weight: 500;
   cursor: pointer; font-family: inherit; transition: all 0.15s;
 }
-.lc-btn:hover { background: var(--lc-bg-layer3); }
+.lc-btn:hover { background: var(--lc-bg-layer3); border-color: var(--lc-border-light); }
+.lc-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .lc-btn-primary {
-  background: var(--lc-brand); color: #1a1a1a;
+  background: var(--lc-brand); color: white;
   border: none; padding: 8px 20px;
   border-radius: var(--radius); font-size: 14px; font-weight: 600;
   cursor: pointer; font-family: inherit; transition: all 0.15s;
+  box-shadow: 0 2px 8px rgba(255, 87, 34, 0.3);
 }
-.lc-btn-primary:hover { opacity: 0.9; }
+.lc-btn-primary:hover { background: var(--lc-brand-hover); box-shadow: 0 4px 12px rgba(255, 87, 34, 0.4); }
+.lc-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
 
 .lc-btn-success {
   background: var(--lc-accepted); color: white;
@@ -119,3 +141,71 @@ a { text-decoration: none; color: inherit; }
   cursor: pointer; font-family: inherit; transition: all 0.15s;
 }
 .lc-btn-success:hover { opacity: 0.9; }
+.lc-btn-success:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Trace Highlight ───────────────────────────── */
+.trace-highlight-line {
+  background: rgba(255, 87, 34, 0.15) !important;
+  border-left: 3px solid var(--lc-brand) !important;
+}
+
+.trace-highlight-glyph {
+  background: var(--lc-brand) !important;
+  width: 4px !important;
+  margin-left: 3px !important;
+}
+
+/* ── High-Contrast Cards ───────────────────────── */
+.card-white {
+  background: var(--lc-card-white);
+  color: var(--lc-card-text);
+  border: 2px solid var(--lc-card-text);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.card-dark {
+  background: var(--lc-bg-layer1);
+  color: var(--lc-text);
+  border: 1px solid var(--lc-border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  transition: all 0.2s;
+}
+
+.card-dark:hover {
+  border-color: var(--lc-border-light);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 87, 34, 0.15);
+}
+
+/* ── Hero Section ──────────────────────────────── */
+.hero-section {
+  background: var(--lc-bg-hero);
+  color: white;
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  border: 1px solid rgba(255, 87, 34, 0.3);
+}
+
+/* ── Icon Styles ───────────────────────────────── */
+.icon-thin {
+  stroke-width: 1.5;
+}
+
+/* ── Active States ─────────────────────────────── */
+.nav-link-active {
+  color: var(--lc-brand) !important;
+  font-weight: 600;
+}
+
+.nav-link-active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--lc-brand);
+}

@@ -16,6 +16,27 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+/**
+ * Helper: all API responses are now wrapped in { success, data, error, timestamp }.
+ * This interceptor unwraps success responses so components get `res.data` directly.
+ */
+api.interceptors.response.use(
+  (response) => {
+    // If the API uses the DTO wrapper, unwrap it
+    if (response.data && typeof response.data === 'object' && 'success' in response.data) {
+      response.data = response.data.data;
+    }
+    return response;
+  },
+  (error) => {
+    // Extract error message from DTO wrapper
+    if (error.response?.data?.error) {
+      error.message = error.response.data.error;
+    }
+    return Promise.reject(error);
+  }
+);
+
 // Auth API
 export const authAPI = {
   register: (data: { name: string; email: string; password: string }) =>
@@ -28,12 +49,17 @@ export const authAPI = {
 export const problemAPI = {
   getAll: () => api.get('/problems'),
   getById: (id: number) => api.get(`/problems/${id}`),
+  getTagCounts: () => api.get('/problems/tags'),
 };
 
 // Submission API
 export const submissionAPI = {
+  run: (data: { problemId: number; language: string; code: string; input: string }) =>
+    api.post('/submissions/run', data),
   submit: (data: { problemId: number; language: string; code: string }) =>
     api.post('/submissions', data),
+  getTrace: (submissionId: number) =>
+    api.get(`/submissions/${submissionId}/trace`),
   getMySubmissions: () => api.get('/submissions'),
   getForProblem: (problemId: number) =>
     api.get(`/submissions/problem/${problemId}`),
